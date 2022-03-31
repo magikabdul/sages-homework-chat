@@ -1,5 +1,9 @@
 import services.ChatClient;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class ChatClientApplication {
 
     private static final String DEFAULT_HOST = "localhost";
@@ -7,6 +11,30 @@ public class ChatClientApplication {
 
 
     public static void main(String[] args) {
-        new ChatClient(DEFAULT_HOST, DEFAULT_PORT).start();
+        new ChatClient(getDefaultHost(args), getDefaultPort(args)).start();
+    }
+
+    private static String getDefaultHost(String[] args) {
+        for (String s : args) {
+            if (s.contains("host:")) {
+                return s.replace("host:", "");
+            }
+        }
+
+        return DEFAULT_HOST;
+    }
+
+    private static int getDefaultPort(String[] args) {
+        for (String s : args) {
+            if (s.contains("port:")) {
+                try {
+                    return Integer.parseInt(s.replace("port:", ""));
+                } catch (NumberFormatException e) {
+                    return DEFAULT_PORT;
+                }
+            }
+        }
+
+        return DEFAULT_PORT;
     }
 }
