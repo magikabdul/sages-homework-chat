@@ -2,6 +2,7 @@ package services.message;
 
 import helpers.BasicClientFactory;
 import org.apache.log4j.Logger;
+import user.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,29 +12,33 @@ import java.net.Socket;
 public class SocketMessageHandler {
 
     private final Logger log = new BasicClientFactory().createLogger(this.getClass());
+    private final User user;
 
-    private final Socket socket;
     private BufferedReader reader;
 
-    public SocketMessageHandler(Socket socket) {
-        this.socket = socket;
+    public SocketMessageHandler(Socket socket, User user) {
+        this.user = user;
 
         try {
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
-            log.error("Cant create InputStream for socket: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     public void read() {
-        while (true) {
-            String command;
-            try {
-                command = reader.readLine();
-                System.out.println(command);
-            } catch (IOException e) {
-                log.error("Reading line error form BufferedReader: " + e.getMessage());
+        String command;
+
+        try {
+            while ((command = reader.readLine()) != null) {
+                if (!command.equals("")) {
+                    System.out.println(command);
+                    user.setLastServerMessage(command);
+                }
+                System.out.print(user.getPrompt());
             }
+        } catch (IOException e) {
+            log.error("Reading line error form BufferedReader: " + e.getMessage());
         }
     }
 }

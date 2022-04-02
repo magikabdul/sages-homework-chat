@@ -2,6 +2,7 @@ package services.message;
 
 import helpers.BasicClientFactory;
 import org.apache.log4j.Logger;
+import user.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,23 +16,21 @@ public class ConsoleMessageHandler {
 
     private PrintWriter writer;
 
-    public void read(Socket socket) {
-
+    public void read(Socket socket, User user) {
         try {
-            writer = new PrintWriter(socket.getOutputStream());
+            writer = new PrintWriter(socket.getOutputStream(), true);
         } catch (IOException e) {
             log.error("Opening OutputStream error: " + e.getMessage());
         }
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-
+        String command;
         while (true) {
-            String command;
             try {
                 command = reader.readLine();
-                writer.println(command);
-                writer.flush();
+                user.setLastClientMessage(command);
+                writer.println(String.format("%s: %s", user.getUserName(), command));
             } catch (IOException e) {
                 log.error("Reading from BufferedReader error: " + e.getMessage());
             }

@@ -1,35 +1,41 @@
 package services;
 
 import helpers.BasicClientFactory;
-import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
 import services.message.ConsoleMessageHandler;
 import services.message.SocketMessageHandler;
+import user.User;
 
 import java.io.IOException;
 import java.net.Socket;
 
-@RequiredArgsConstructor
 public class ChatClient {
 
     private final Logger log = new BasicClientFactory().createLogger(this.getClass());
 
-    private final String host;
-    private final int port;
+    private Socket socket;
 
-    public void start() {
-        log.info(String.format("Chat client has started. Trying to connect to: %s:%d", host, port));
-        clearConsole();
+    public ChatClient(String host, int port) {
+        log.debug(String.format("Chat client has started. Trying to connect to: %s:%d", host, port));
 
         try {
-            Socket socket = new Socket(host, port);
-            new ConsoleMessageHandler().read(socket);
-            new SocketMessageHandler(socket).read();
+            socket = new Socket(host, port);
         } catch (IOException e) {
             log.error("Socket connection error: " + e.getMessage());
         }
+    }
 
-        log.error("Connection failed");
+    public void start() {
+        User user = new User();
+        clearConsole();
+
+        Thread thread = new Thread(() -> new ConsoleMessageHandler().read(socket, user));
+        thread.setDaemon(true);
+        thread.start();
+
+        new SocketMessageHandler(socket, user).read();
+
+        log.debug("Client disconnected");
     }
 
     private void clearConsole() {
