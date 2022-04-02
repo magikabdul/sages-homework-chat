@@ -1,9 +1,5 @@
 import services.ChatClient;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class ChatClientApplication {
 
     private static final String DEFAULT_HOST = "localhost";

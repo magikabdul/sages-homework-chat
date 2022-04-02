@@ -19,7 +19,8 @@ public class ChatWorker implements Runnable {
     public void run() {
         log.debug("Running new chat worker thread");
 
-        MessageWriter messageWriter = new MessageWriter(socket);
-        new MessageReader(socket, messageWriter).read();
+        User user = new User();
+        MessageWriter messageWriter = new MessageWriter(socket, user);
+        new MessageReader(socket, messageWriter, user).read();
     }
 }

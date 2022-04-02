@@ -2,6 +2,7 @@ package services.messages;
 
 import helpers.BasicServerFactory;
 import org.apache.log4j.Logger;
+import services.workers.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,12 +15,14 @@ public class MessageReader {
 
     private final Socket socket;
     private final MessageWriter messageWriter;
+    private final User user;
 
     private BufferedReader bufferedReader;
 
-    public MessageReader(Socket socket, MessageWriter messageWriter) {
+    public MessageReader(Socket socket, MessageWriter messageWriter, User user) {
         this.socket = socket;
         this.messageWriter = messageWriter;
+        this.user = user;
 
         try {
             bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -35,12 +38,16 @@ public class MessageReader {
 
             while (true) {
                 String message = bufferedReader.readLine();
-                log.info(message);
+                user.setLastClientMessage(message);
+                user.updateUserName();
+
+                log.info(String.format("%s - %s", user.getUserName(), message));
                 if (message.endsWith("\\q")) {
-                    messageWriter.sendText("Bye !!!");
+                    messageWriter.sendText(String.format("Bye %s !!!", user.getUserName()));
                     socket.close();
                     break;
                 }
+                messageWriter.sendText("");
             }
 
         } catch (IOException e) {
