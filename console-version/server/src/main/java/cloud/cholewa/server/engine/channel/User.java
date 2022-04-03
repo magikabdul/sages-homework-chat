@@ -1,6 +1,5 @@
 package cloud.cholewa.server.engine.channel;
 
-import cloud.cholewa.server.engine.channel.message.MessageDictionary;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
