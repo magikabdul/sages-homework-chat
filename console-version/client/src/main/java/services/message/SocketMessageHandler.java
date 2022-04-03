@@ -33,10 +33,12 @@ public class SocketMessageHandler {
             while ((command = reader.readLine()) != null) {
 
                 if (command.startsWith("Bye") && command.endsWith("!!!")) {
+                    System.out.println("");
                     System.out.println(command);
                     reader.close();
                     break;
                 } else if (!command.equals("")) {
+                    System.out.println("");
                     System.out.println(command);
                     user.setLastServerMessage(command);
                 } else {
