@@ -1,18 +1,18 @@
-package services;
+package cloud.cholewa.server;
 
-import helpers.BasicServerFactory;
-import helpers.ServerFactory;
+import cloud.cholewa.server.builders.BasicServerFactory;
+import cloud.cholewa.server.builders.ServerFactory;
+import cloud.cholewa.server.engine.ServerEngine;
+import cloud.cholewa.server.engine.channel.Worker;
 import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
-import services.workers.ChatWorker;
-import services.workers.ChatWorkers;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 
-import static helpers.ExecutorServiceType.FIXED;
+import static cloud.cholewa.server.builders.ExecutorServiceType.FIXED;
 
 @RequiredArgsConstructor
 public class ChatServer {
@@ -21,7 +21,7 @@ public class ChatServer {
 
     private final Logger log = factory.createLogger(this.getClass());
     private final ExecutorService executorService = factory.createExecutorService(FIXED, 1024);
-    private final ChatWorkers workers = factory.createChatWorkers();
+    private final ServerEngine engine = factory.createServerEngine();
 
     private final int port;
 
@@ -42,16 +42,12 @@ public class ChatServer {
                 Socket socket = serverSocket.accept();
                 log.debug("New client connected");
 
-                ChatWorker chatWorker = new ChatWorker(socket, workers);
-                executorService.execute(chatWorker);
-                workers.add(chatWorker);
+                Worker worker = new Worker(socket);
+                executorService.execute(worker);
+                engine.addWorker(worker);
             }
         } catch (IOException e) {
             log.error("Listening failed: " + e.getMessage());
         }
-    }
-
-    private void removeSingleChatWorker(ChatWorker chatWorker) {
-        workers.remove(chatWorker);
     }
 }

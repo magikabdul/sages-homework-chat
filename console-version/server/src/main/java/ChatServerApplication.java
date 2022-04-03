@@ -1,4 +1,4 @@
-import services.ChatServer;
+import cloud.cholewa.server.ChatServer;
 
 public class ChatServerApplication {
 
