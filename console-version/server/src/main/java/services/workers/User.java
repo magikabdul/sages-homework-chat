@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User {
 
-    private String userName = "";
+    private String name = "";
     private String lastServerMessage = "";
     private String lastClientMessage = "";
 
-    public void updateUserName() {
+    public void updateName() {
         if (lastServerMessage.equals("Please enter your nickname:")) {
-            setUserName(lastClientMessage.substring(2));
+            setName(lastClientMessage.substring(2));
             setLastServerMessage("");
         }
     }

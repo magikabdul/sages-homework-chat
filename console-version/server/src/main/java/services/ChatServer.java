@@ -5,6 +5,7 @@ import helpers.ServerFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
 import services.workers.ChatWorker;
+import services.workers.ChatWorkers;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -20,6 +21,7 @@ public class ChatServer {
 
     private final Logger log = factory.createLogger(this.getClass());
     private final ExecutorService executorService = factory.createExecutorService(FIXED, 1024);
+    private final ChatWorkers workers = factory.createChatWorkers();
 
     private final int port;
 
@@ -40,12 +42,16 @@ public class ChatServer {
                 Socket socket = serverSocket.accept();
                 log.debug("New client connected");
 
-                ChatWorker chatWorker = new ChatWorker(socket);
+                ChatWorker chatWorker = new ChatWorker(socket, workers);
                 executorService.execute(chatWorker);
-
+                workers.add(chatWorker);
             }
         } catch (IOException e) {
             log.error("Listening failed: " + e.getMessage());
         }
+    }
+
+    private void removeSingleChatWorker(ChatWorker chatWorker) {
+        workers.remove(chatWorker);
     }
 }

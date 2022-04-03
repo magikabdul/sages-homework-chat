@@ -1,6 +1,7 @@
 package helpers;
 
 import org.apache.log4j.Logger;
+import services.workers.ChatWorkers;
 
 import java.util.concurrent.ExecutorService;
 
@@ -10,5 +11,5 @@ public interface ServerFactory {
 
     ExecutorService createExecutorService(ExecutorServiceType type, int poolSize);
 
-    
+    ChatWorkers createChatWorkers();
 }
