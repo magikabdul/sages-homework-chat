@@ -2,12 +2,15 @@ package services.messages;
 
 import helpers.BasicServerFactory;
 import org.apache.log4j.Logger;
-import services.workers.User;
+import services.workers.ControlCommand;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.function.Consumer;
+
+import static services.workers.ControlCommand.MESSAGE_PLEASE_ENTER_YOUR_NAME;
 
 public class MessageReader {
 
@@ -15,14 +18,14 @@ public class MessageReader {
 
     private final Socket socket;
     private final MessageWriter messageWriter;
-    private final User user;
+    private final Consumer<String> processReadMessage;
 
     private BufferedReader bufferedReader;
 
-    public MessageReader(Socket socket, MessageWriter messageWriter, User user) {
+    public MessageReader(Socket socket, Consumer<String> processReadMessage, MessageWriter messageWriter) {
         this.socket = socket;
+        this.processReadMessage = processReadMessage;
         this.messageWriter = messageWriter;
-        this.user = user;
 
         try {
             bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -32,29 +35,13 @@ public class MessageReader {
     }
 
     public void read() {
-        messageWriter.sendText("Please enter your nickname:");
+        messageWriter.sendText(MESSAGE_PLEASE_ENTER_YOUR_NAME);
 
         try {
 
             while (true) {
                 String message = bufferedReader.readLine();
-                user.setLastClientMessage(message);
-
-                if (user.getUserName().isBlank()) {
-                    user.updateUserName();
-                    log.debug(String.format("User \"%s\" has been logged in", user.getUserName()));
-                    messageWriter.sendText("");
-                } else if (message.contains("\\")) {
-                    if (message.endsWith("\\q")) {
-                        messageWriter.sendText(String.format("Bye %s !!!", user.getUserName()));
-                        log.debug(String.format("User \"%s\" has left server", user.getUserName()));
-                        socket.close();
-                        break;
-                    }
-                } else {
-                    log.info(message);
-                    messageWriter.sendText("");
-                }
+                processReadMessage.accept(message);
             }
 
         } catch (IOException e) {

@@ -6,5 +6,5 @@ public interface ChatWorkers {
 
     void remove(ChatWorker chatWorker);
 
-    void broadcast(String message);
+    void broadcast(String message, ChatWorker sourceWorker);
 }
