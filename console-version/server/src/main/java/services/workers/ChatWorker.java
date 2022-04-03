@@ -1,5 +1,6 @@
 package services.workers;
 
+import exceptions.ConnectionLostException;
 import helpers.BasicServerFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
@@ -29,7 +30,11 @@ public class ChatWorker implements Runnable {
     public void run() {
         log.debug("Running new chat worker thread");
         messageWriter = new MessageWriter(socket, user);
-        new MessageReader(socket, this::processReadMessage, messageWriter).read();
+        try {
+            new MessageReader(socket, this::processReadMessage, messageWriter).read();
+        } catch (ConnectionLostException e) {
+            workers.remove(this);
+        }
     }
 
     public void processReadMessage(String message) {

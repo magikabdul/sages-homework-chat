@@ -1,5 +1,6 @@
 package services.messages;
 
+import exceptions.ConnectionLostException;
 import helpers.BasicServerFactory;
 import org.apache.log4j.Logger;
 import services.workers.ControlCommand;
@@ -34,7 +35,7 @@ public class MessageReader {
         }
     }
 
-    public void read() {
+    public void read() throws ConnectionLostException {
         messageWriter.sendText(MESSAGE_PLEASE_ENTER_YOUR_NAME);
 
         try {
@@ -52,7 +53,8 @@ public class MessageReader {
                     ex.printStackTrace();
                 }
             }
-            log.error("Problem with creating InputStreamReader: " + e.getMessage());
+            log.error("Problem with InputStreamReader: " + e.getMessage());
+            throw new ConnectionLostException("Client connection lost");
         }
     }
 }
