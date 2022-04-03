@@ -1,9 +1,11 @@
-package helpers;
+package cloud.cholewa.server.builders;
 
+import cloud.cholewa.server.engine.ServerEngine;
+import cloud.cholewa.server.engine.channel.ChatChannel;
 import org.apache.log4j.Logger;
-import services.workers.ChatWorkers;
-import services.workers.ListChatWorkers;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,7 +29,12 @@ public class BasicServerFactory implements ServerFactory {
     }
 
     @Override
-    public ChatWorkers createChatWorkers() {
-        return new ListChatWorkers();
+    public ServerEngine createServerEngine() {
+        return new ServerEngine();
+    }
+
+    @Override
+    public List<ChatChannel> createChatChannelList() {
+        return new ArrayList<>();
     }
 }
