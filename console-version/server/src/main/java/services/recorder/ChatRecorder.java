@@ -1,14 +1,13 @@
 package services.recorder;
 
-import lombok.RequiredArgsConstructor;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import static helpers.DateTimeService.getCurrentDate;
+import static helpers.DateTimeService.getCurrentTime;
 
 public class ChatRecorder {
 
@@ -30,13 +29,5 @@ public class ChatRecorder {
             e.printStackTrace();
         }
         lock.writeLock().unlock();
-    }
-
-    private String getCurrentTime() {
-        return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
-    }
-
-    private String getCurrentDate() {
-        return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDateTime.now());
     }
 }
