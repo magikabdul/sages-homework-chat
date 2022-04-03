@@ -13,8 +13,8 @@ public class User {
 
     public void updateUserName() {
         if (lastServerMessage.equals("Please enter your nickname:")) {
-            setUserName(lastClientMessage);
+            setUserName(lastClientMessage.substring(2));
+            setLastServerMessage("");
         }
-        setLastServerMessage("");
     }
 }

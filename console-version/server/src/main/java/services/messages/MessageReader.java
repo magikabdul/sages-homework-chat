@@ -39,15 +39,22 @@ public class MessageReader {
             while (true) {
                 String message = bufferedReader.readLine();
                 user.setLastClientMessage(message);
-                user.updateUserName();
 
-                log.info(String.format("%s - %s", user.getUserName(), message));
-                if (message.endsWith("\\q")) {
-                    messageWriter.sendText(String.format("Bye %s !!!", user.getUserName()));
-                    socket.close();
-                    break;
+                if (user.getUserName().isBlank()) {
+                    user.updateUserName();
+                    log.debug(String.format("User \"%s\" has been logged in", user.getUserName()));
+                    messageWriter.sendText("");
+                } else if (message.contains("\\")) {
+                    if (message.endsWith("\\q")) {
+                        messageWriter.sendText(String.format("Bye %s !!!", user.getUserName()));
+                        log.debug(String.format("User \"%s\" has left server", user.getUserName()));
+                        socket.close();
+                        break;
+                    }
+                } else {
+                    log.info(message);
+                    messageWriter.sendText("");
                 }
-                messageWriter.sendText("");
             }
 
         } catch (IOException e) {

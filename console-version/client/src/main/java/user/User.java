@@ -17,8 +17,8 @@ public class User {
         if (lastServerMessage.contains("Please enter your nickname:")) {
             if (lastClientMessage.length() > 0) {
                 setUserName(lastClientMessage);
+                setLastServerMessage("");
             }
-            setLastServerMessage("");
         }
 
         if (!userName.isBlank()) {
