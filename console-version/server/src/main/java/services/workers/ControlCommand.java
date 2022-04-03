@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class ControlCommand {
@@ -52,5 +53,8 @@ public class ControlCommand {
         String userName = worker.getUser().getName();
 
         log.debug(String.format("User \"%s\" is downloading history", userName));
+        List<String> chatHistory = worker.getWorkers().getChatHistory(worker);
+
+        chatHistory.forEach(s -> worker.getMessageWriter().sendText(s));
     }
 }
