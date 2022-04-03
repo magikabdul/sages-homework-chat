@@ -1,4 +1,4 @@
-package helpers;
+package cloud.cholewa.server.helpers;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
