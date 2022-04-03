@@ -1,14 +1,17 @@
 package services.recorder;
 
-import lombok.RequiredArgsConstructor;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import static helpers.DateTimeService.getCurrentDate;
+import static helpers.DateTimeService.getCurrentTime;
 
 public class ChatRecorder {
 
@@ -32,11 +35,25 @@ public class ChatRecorder {
         lock.writeLock().unlock();
     }
 
-    private String getCurrentTime() {
-        return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
-    }
+    public List<String> getHistory(String fileName) {
+        List<String> history = new ArrayList<>();
 
-    private String getCurrentDate() {
-        return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDateTime.now());
+        lock.writeLock().lock();
+
+        try (
+                var fileReader = new FileReader(fileName);
+                var bufferedReader = new BufferedReader(fileReader)
+        ) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                history.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        lock.writeLock().unlock();
+
+        return history;
     }
 }

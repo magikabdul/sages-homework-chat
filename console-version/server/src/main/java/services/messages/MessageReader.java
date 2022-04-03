@@ -3,7 +3,6 @@ package services.messages;
 import exceptions.ConnectionLostException;
 import helpers.BasicServerFactory;
 import org.apache.log4j.Logger;
-import services.workers.ControlCommand;
 
 import java.io.BufferedReader;
 import java.io.IOException;
