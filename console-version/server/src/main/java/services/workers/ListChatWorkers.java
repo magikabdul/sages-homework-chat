@@ -1,6 +1,7 @@
 package services.workers;
 
 import helpers.BasicServerFactory;
+import helpers.DateTimeService;
 import org.apache.log4j.Logger;
 import services.recorder.ChatRecorder;
 
@@ -32,5 +33,11 @@ public class ListChatWorkers implements ChatWorkers {
         workerList.stream()
                 .filter(chatWorker -> !chatWorker.equals(sourceWorker))
                 .forEach(chatWorker -> chatWorker.send(message));
+    }
+
+    @Override
+    public List<String> getChatHistory(ChatWorker worker) {
+        log.debug("User requester for file with chat history");
+        return recorder.getHistory(DateTimeService.getCurrentDate() + "-GlobalChat.txt");
     }
 }
