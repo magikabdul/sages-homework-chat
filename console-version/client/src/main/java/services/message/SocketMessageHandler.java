@@ -31,11 +31,17 @@ public class SocketMessageHandler {
 
         try {
             while ((command = reader.readLine()) != null) {
-                if (!command.equals("")) {
+
+                if (command.startsWith("Bye") && command.endsWith("!!!")) {
+                    System.out.println(command);
+                    reader.close();
+                    break;
+                } else if (!command.equals("")) {
                     System.out.println(command);
                     user.setLastServerMessage(command);
+                } else {
+                    System.out.print(user.getPrompt());
                 }
-                System.out.print(user.getPrompt());
             }
         } catch (IOException e) {
             log.error("Reading line error form BufferedReader: " + e.getMessage());
