@@ -17,4 +17,10 @@ public interface ChatChannel {
     void transferFile();
 
     void transferWorker(Worker Worker, ChatChannel chatChannel);
+
+    String getName();
+
+    int getNumberOfLoggedUsers();
+
+    List<Worker> getAllWorkers();
 }

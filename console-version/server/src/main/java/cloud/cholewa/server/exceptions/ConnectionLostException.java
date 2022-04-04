@@ -1,4 +1,4 @@
-package exceptions;
+package cloud.cholewa.server.exceptions;
 
 public class ConnectionLostException extends Exception {
 

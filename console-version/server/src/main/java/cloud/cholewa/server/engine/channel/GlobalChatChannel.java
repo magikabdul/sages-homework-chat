@@ -49,4 +49,19 @@ public class GlobalChatChannel implements ChatChannel {
     public void transferWorker(Worker worker, ChatChannel chatChannel) {
         //TODO
     }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public int getNumberOfLoggedUsers() {
+        return workers.size();
+    }
+
+    @Override
+    public List<Worker> getAllWorkers() {
+        return workers;
+    }
 }

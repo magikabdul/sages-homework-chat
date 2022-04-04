@@ -59,4 +59,19 @@ public class PrivateChatChannel implements ChatChannel {
     public void addMember(String name) {
         members.add(name);
     }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public int getNumberOfLoggedUsers() {
+        return workers.size();
+    }
+
+    @Override
+    public List<Worker> getAllWorkers() {
+        return workers;
+    }
 }
