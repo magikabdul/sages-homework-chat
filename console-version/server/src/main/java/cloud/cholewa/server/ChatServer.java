@@ -6,12 +6,16 @@ import cloud.cholewa.server.engine.ServerEngine;
 import cloud.cholewa.server.engine.channel.ChatChannel;
 import cloud.cholewa.server.engine.channel.Worker;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import static cloud.cholewa.server.builders.ExecutorServiceType.FIXED;
@@ -29,6 +33,8 @@ public class ChatServer {
     private final int port;
 
     public void start() {
+        log.setLevel(Level.ALL);
+
         try {
             ServerSocket serverSocket = new ServerSocket(port);
             log.debug(String.format("Server started listening on port: %d", port));
@@ -39,6 +45,7 @@ public class ChatServer {
     }
 
     private void listen(ServerSocket serverSocket) {
+        executorService.execute(() -> new ChatChannelsLogger().run());
 
         try {
             while (true) {
@@ -51,6 +58,26 @@ public class ChatServer {
             }
         } catch (IOException e) {
             log.error("Listening failed: " + e.getMessage());
+        }
+    }
+
+    class ChatChannelsLogger {
+
+        @SneakyThrows
+        private void run() {
+            Map<String, Integer> channelStatus = new HashMap<>();
+
+            while (true) {
+                serverChannels.forEach(chatChannel ->
+                        channelStatus.put(chatChannel.getName(), chatChannel.getNumberOfLoggedUsers()));
+
+                log.trace("-----------------------------------------------------------------------------");
+                for (Map.Entry<String, Integer> e : channelStatus.entrySet()) {
+                    log.trace(String.format("Server channel \"%s\" has number of active users: %d", e.getKey(), e.getValue()));
+                }
+
+                Thread.sleep(10_000);
+            }
         }
     }
 }
