@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static cloud.cholewa.server.builders.ExecutorServiceType.FIXED;
 
@@ -67,10 +68,14 @@ public class ChatServer {
         private void run() {
             Map<String, Integer> channelStatus = new HashMap<>();
 
+            ThreadPoolExecutor pool = (ThreadPoolExecutor) executorService;
+
             while (true) {
                 serverChannels.forEach(chatChannel ->
                         channelStatus.put(chatChannel.getName(), chatChannel.getNumberOfLoggedUsers()));
 
+                log.trace("-----------------------------------------------------------------------------");
+                log.trace("Number of active threads: " + pool.getActiveCount());
                 log.trace("-----------------------------------------------------------------------------");
                 for (Map.Entry<String, Integer> e : channelStatus.entrySet()) {
                     log.trace(String.format("Server channel \"%s\" has number of active users: %d", e.getKey(), e.getValue()));
