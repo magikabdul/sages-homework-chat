@@ -29,8 +29,8 @@ public class BasicServerFactory implements ServerFactory {
     }
 
     @Override
-    public ServerEngine createServerEngine() {
-        return new ServerEngine();
+    public ServerEngine createServerEngine(List<ChatChannel> serverChannels) {
+        return new ServerEngine(serverChannels);
     }
 
     @Override

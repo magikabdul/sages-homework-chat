@@ -3,6 +3,7 @@ package cloud.cholewa.server;
 import cloud.cholewa.server.builders.BasicServerFactory;
 import cloud.cholewa.server.builders.ServerFactory;
 import cloud.cholewa.server.engine.ServerEngine;
+import cloud.cholewa.server.engine.channel.ChatChannel;
 import cloud.cholewa.server.engine.channel.Worker;
 import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
@@ -10,6 +11,7 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static cloud.cholewa.server.builders.ExecutorServiceType.FIXED;
@@ -21,7 +23,8 @@ public class ChatServer {
 
     private final Logger log = factory.createLogger(this.getClass());
     private final ExecutorService executorService = factory.createExecutorService(FIXED, 1024);
-    private final ServerEngine engine = factory.createServerEngine();
+    private final List<ChatChannel> serverChannels = factory.createChatChannelList();
+    private final ServerEngine engine = factory.createServerEngine(serverChannels);
 
     private final int port;
 
@@ -42,7 +45,7 @@ public class ChatServer {
                 Socket socket = serverSocket.accept();
                 log.debug("New client connected");
 
-                Worker worker = new Worker(socket);
+                Worker worker = new Worker(socket, serverChannels);
                 executorService.execute(worker);
                 engine.addWorker(worker);
             }

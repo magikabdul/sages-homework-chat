@@ -14,11 +14,13 @@ public class ServerEngine {
 
     private final ServerFactory factory = new BasicServerFactory();
     private final Logger log = factory.createLogger(this.getClass());
-    private final List<ChatChannel> serverChannels = factory.createChatChannelList();
 
+    private final List<ChatChannel> serverChannels;
     private final GlobalChatChannel globalChatChannel;
 
-    public ServerEngine() {
+    public ServerEngine(List<ChatChannel> serverChannels) {
+        this.serverChannels = serverChannels;
+
         globalChatChannel = new GlobalChatChannel();
         serverChannels.add(globalChatChannel);
         initializeCustomServerConfiguration();

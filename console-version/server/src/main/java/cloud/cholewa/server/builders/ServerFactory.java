@@ -15,5 +15,5 @@ public interface ServerFactory {
 
     List<ChatChannel> createChatChannelList();
 
-    ServerEngine createServerEngine();
+    ServerEngine createServerEngine(List<ChatChannel> serverChannels);
 }
