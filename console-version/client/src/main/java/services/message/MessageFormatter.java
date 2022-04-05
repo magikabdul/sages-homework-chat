@@ -53,17 +53,6 @@ public class MessageFormatter {
         return getKeyValue(message, PROMPT_KEY);
     }
 
-
-//    private boolean isEnd(String message) {
-//        if (message.startsWith("Bye") && message.endsWith("!!!")) {
-//            System.out.println("");
-//            System.out.println(message);
-////            reader.close();
-//            return true;
-//        }
-//        return false;
-//    }
-
     static String getKeyValue(String message, String key) {
         String[] keys = message.split("/");
         for (String s : keys) {

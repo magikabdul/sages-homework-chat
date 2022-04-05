@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class SocketMessageHandler {
 
@@ -27,26 +28,23 @@ public class SocketMessageHandler {
     }
 
     public void read() {
-        String command;
+        String message;
 
         try {
-            while ((command = reader.readLine()) != null) {
+            while ((message = reader.readLine()) != null) {
 
-                if (command.startsWith("Bye") && command.endsWith("!!!")) {
-                    System.out.println("");
-                    System.out.println(command);
+                System.out.println(MessageFormatter.build(message));
+                //TODO do it in better right way :)
+                if (message.contains("/systemCommandIs:Bye")) {
                     reader.close();
                     break;
-                } else if (!command.equals("")) {
-                    System.out.println("");
-                    System.out.println(command);
-                    user.setLastServerMessage(command);
-                } else {
-                    System.out.print(user.getPrompt());
                 }
+
             }
         } catch (IOException e) {
             log.error("Reading line error form BufferedReader: " + e.getMessage());
         }
     }
+
+
 }
