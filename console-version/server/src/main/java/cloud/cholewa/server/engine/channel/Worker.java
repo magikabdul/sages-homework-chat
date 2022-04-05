@@ -40,10 +40,8 @@ public class Worker implements Runnable {
     }
 
     private void processIncomingMessage(String message) {
-        if (message != null) {
             //TODO add channel support
             log.debug("New message form form channel: " + message);
-        }
     }
 
     private void removeWorkerFromServerChannels() {

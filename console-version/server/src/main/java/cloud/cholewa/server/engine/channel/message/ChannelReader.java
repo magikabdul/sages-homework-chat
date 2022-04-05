@@ -1,6 +1,8 @@
 package cloud.cholewa.server.engine.channel.message;
 
 import cloud.cholewa.server.builders.BasicServerFactory;
+import cloud.cholewa.server.exceptions.ConnectionLostException;
+import lombok.SneakyThrows;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -31,20 +33,25 @@ public class ChannelReader {
         }
     }
 
-    public void read() {
+    @SneakyThrows
+    public void read() throws ConnectionLostException {
         writer.send(MESSAGE_PLEASE_ENTER_YOUR_NAME);
 
+        String message;
+
         try {
-            while (true) {
-                String message = bufferedReader.readLine();
-                //TODO can i place it in while statement?
-                processReadMessage.accept(message);
+            while ((message = bufferedReader.readLine()) != null) {
+                if (message.startsWith(": null")) {
+                    bufferedReader.close();
+                } else {
+                    processReadMessage.accept(message);
+
+                }
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            //TODO do add closing reader stream?
+            bufferedReader.close();
 
-            //throw new ConnectionLostException("Client connection lost");
+            throw new ConnectionLostException("Client connection lost");
         }
     }
 }
