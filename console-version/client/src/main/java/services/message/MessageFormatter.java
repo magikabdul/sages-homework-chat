@@ -20,7 +20,11 @@ public class MessageFormatter {
         String messageBody = parseMessageBody(message);
 
         if (!systemCommand.isBlank()) {
-            return sb.append(systemCommand).append(NEW_LINE).append(PROMPT).toString();
+            if (systemCommand.equals("received")) {
+                return sb.append(PROMPT).toString();
+            } else {
+                return sb.append(systemCommand).append(NEW_LINE).append(PROMPT).toString();
+            }
         } else if (!messageBody.isBlank()) {
             if (!channelName.isBlank()) {
                 sb.append(channelName).append("/");

@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Arrays;
 
 public class SocketMessageHandler {
 
@@ -33,7 +32,7 @@ public class SocketMessageHandler {
         try {
             while ((message = reader.readLine()) != null) {
 
-                System.out.println(MessageFormatter.build(message));
+                System.out.print(MessageFormatter.build(message.replace("\n", "")));
                 //TODO do it in better right way :)
                 if (message.contains("/systemCommandIs:Bye")) {
                     reader.close();

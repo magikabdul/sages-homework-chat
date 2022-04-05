@@ -35,7 +35,7 @@ public class ChannelReader {
 
     @SneakyThrows
     public void read() throws ConnectionLostException {
-        writer.send(MESSAGE_PLEASE_ENTER_YOUR_NAME);
+        writer.send("", "", MESSAGE_PLEASE_ENTER_YOUR_NAME, "");
 
         String message;
 
@@ -44,6 +44,7 @@ public class ChannelReader {
                 if (message.startsWith(": null")) {
                     bufferedReader.close();
                 } else {
+                    writer.send("", "", "received", "");
                     processReadMessage.accept(message);
 
                 }

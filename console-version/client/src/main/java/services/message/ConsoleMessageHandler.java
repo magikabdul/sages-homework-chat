@@ -30,7 +30,7 @@ public class ConsoleMessageHandler {
             try {
                 command = reader.readLine();
                 user.setLastClientMessage(command);
-                writer.println(String.format("%s: %s", user.getUserName(), command));
+                writer.println(command);
             } catch (IOException e) {
                 log.error("Reading from BufferedReader error: " + e.getMessage());
             }
