@@ -1,11 +1,14 @@
 package cloud.cholewa.server.engine.channel;
 
 import cloud.cholewa.server.builders.BasicServerFactory;
+import cloud.cholewa.server.engine.channel.message.ChannelWriter;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_CHAT;
 
 public class PrivateChatChannel implements ChatChannel {
 
@@ -31,7 +34,14 @@ public class PrivateChatChannel implements ChatChannel {
 
     @Override
     public void broadcast(Worker worker, String message) {
-        //TODO
+        workers.stream()
+                .filter(w -> !w.equals(worker))
+                .filter(w -> !w.getUser().getName().isBlank()) //exclude connected but not logged yet
+                .forEach(w -> {
+                    ChannelWriter writer = w.getWriter();
+                    writer.send(SERVER_COMMAND_CHAT, message);
+                    writer.send("", "");
+                });
     }
 
     @Override
@@ -58,6 +68,9 @@ public class PrivateChatChannel implements ChatChannel {
 
     public void addMember(String name) {
         members.add(name);
+    }
+    public List<String> getAllMembers() {
+        return members;
     }
 
     @Override

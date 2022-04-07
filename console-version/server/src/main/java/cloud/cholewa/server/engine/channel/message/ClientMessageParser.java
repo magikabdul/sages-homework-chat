@@ -16,6 +16,7 @@ public class ClientMessageParser {
 
     public static final String CONTROL_COMMAND_EMPTY_BODY = "";
     public static final String CONTROL_COMMAND_END_SESSION = "\\q";
+    public static final String CONTROL_COMMAND_CHANNEL_CHANGE = "\\c";
 
     private final HashMap<String, String> keysMap = new HashMap<>();
 

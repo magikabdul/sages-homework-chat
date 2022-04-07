@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+import static services.message.ServerMessageParser.SERVER_COMMAND_CHANNEL;
 import static services.message.ServerMessageParser.SERVER_COMMAND_CHAT;
 import static services.message.ServerMessageParser.SERVER_COMMAND_END_SESSION;
 import static services.message.ServerMessageParser.SERVER_COMMAND_LOGIN;
@@ -44,7 +45,7 @@ public class ServerMessageReader {
             while ((message = reader.readLine()) != null) {
 
                 parser.parseToMap(message);
-//                log.debug("SERVER: " + message);
+                log.debug("SERVER: " + message);
 
                 switch (parser.getServerCommandType()) {
                     case SERVER_COMMAND_OK:
@@ -52,6 +53,10 @@ public class ServerMessageReader {
                         break;
                     case SERVER_COMMAND_LOGIN:
                         System.out.print("\n" + "Please enter your name " + PROMPT);
+                        break;
+                    case SERVER_COMMAND_CHANNEL:
+                        System.out.println();
+                        System.out.println(parser.getKeyMessageBody());
                         break;
                     case SERVER_COMMAND_CHAT:
                         System.out.println();
