@@ -4,7 +4,9 @@ import cloud.cholewa.server.builders.BasicServerFactory;
 import cloud.cholewa.server.engine.channel.message.ChannelReader;
 import cloud.cholewa.server.engine.channel.message.ChannelWriter;
 import cloud.cholewa.server.engine.channel.message.ClientMessageParser;
+import cloud.cholewa.server.engine.channel.storage.ChannelHistoryStorage;
 import cloud.cholewa.server.exceptions.ConnectionLostException;
+import cloud.cholewa.server.helpers.DateTimeService;
 import lombok.Getter;
 import org.apache.log4j.Logger;
 
@@ -23,6 +25,8 @@ import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.HE
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.MESSAGE_TYPE_SYSTEM;
 import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_CHANNEL;
 import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_END_SESSION;
+import static cloud.cholewa.server.helpers.DateTimeService.getCurrentDate;
+import static cloud.cholewa.server.helpers.DateTimeService.getCurrentTime;
 
 
 public class Worker implements Runnable {
@@ -32,6 +36,7 @@ public class Worker implements Runnable {
     @Getter
     private final User user = new User();
     private final ClientMessageParser clientMessageParser = new ClientMessageParser();
+    private final ChannelHistoryStorage historyStorage = new ChannelHistoryStorage();
 
     private final Socket socket;
     private final List<ChatChannel> serverChannels;
@@ -92,7 +97,9 @@ public class Worker implements Runnable {
         } else if (message.contains(CONTROL_COMMAND_CHANNEL_CHANGE)) {
             changeChannel(message.substring(2));    //removing \c
         } else {
-            broadcastMessageToAllChannelUsers(clientMessageParser.getBody());
+            String messageBody = clientMessageParser.getBody();
+            broadcastMessageToAllChannelUsers(messageBody);
+            historyStorage.save(user.getChannel(), String.format("%s [%s] - %s", getCurrentTime(), user.getName(), messageBody));
             writer.send("", "");
         }
     }
