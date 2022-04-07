@@ -23,7 +23,7 @@ public class ServerMessageParser {
 
     private final User user;
 
-    public boolean parseToMap(String message) {
+    public void parseToMap(String message) {
         String[] keys = message.split("/");
 
         for (String key : keys) {
@@ -33,8 +33,6 @@ public class ServerMessageParser {
 
         user.setChannel(keysMap.get(KEY_CHANNEL_NAME));
         user.setName(keysMap.get(KEY_USER_NAME));
-
-        return keysMap.size() == 4;
     }
 
     public String getServerCommandType() {

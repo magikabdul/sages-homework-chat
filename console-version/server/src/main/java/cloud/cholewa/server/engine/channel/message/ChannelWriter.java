@@ -12,13 +12,13 @@ import java.net.Socket;
 public class ChannelWriter {
 
     private final Logger log = new BasicServerFactory().createLogger(this.getClass());
-    private final String messageTemplate = "channelNameIs:%s/userNameIs:%s/systemCommandIs:%s/messageBodyIs:%s/promptIs:%s\n";
+    private final ServerMessageBuilder builder;
 
-    private final User user;
+
     private PrintWriter printWriter;
 
     public ChannelWriter(Socket socket, User user) {
-        this.user = user;
+        builder = new ServerMessageBuilder(user);
 
         try {
             printWriter = new PrintWriter(socket.getOutputStream(), true);
@@ -27,14 +27,8 @@ public class ChannelWriter {
         }
     }
 
-    public void send(@NonNull String channelName,
-                     @NonNull String userName,
-                     @NonNull String systemCommand,
-                     @NonNull String messageBody) {
-        printWriter.printf(messageTemplate, channelName, userName, systemCommand, messageBody, "");
+    public void send(@NonNull String systemCommand, @NonNull String messageBody) {
+        printWriter.println(builder.build(systemCommand, messageBody));
     }
 
-    public String sendPrompt() {
-        return "#> ";
-    }
 }

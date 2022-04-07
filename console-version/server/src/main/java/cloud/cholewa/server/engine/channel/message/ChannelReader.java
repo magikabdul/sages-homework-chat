@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.function.Consumer;
 
-import static cloud.cholewa.server.engine.channel.message.MessageDictionary.MESSAGE_PLEASE_ENTER_YOUR_NAME;
+import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_LOGIN;
 
 public class ChannelReader {
 
@@ -35,19 +35,13 @@ public class ChannelReader {
 
     @SneakyThrows
     public void read() throws ConnectionLostException {
-        writer.send("", "", MESSAGE_PLEASE_ENTER_YOUR_NAME, "");
+        writer.send(SERVER_COMMAND_LOGIN, "");
 
         String message;
 
         try {
             while ((message = bufferedReader.readLine()) != null) {
-                if (message.startsWith(": null")) {
-                    bufferedReader.close();
-                } else {
-                    writer.send("", "", "received", "");
-                    processReadMessage.accept(message);
-
-                }
+                processReadMessage.accept(message);
             }
         } catch (IOException e) {
             bufferedReader.close();
