@@ -52,7 +52,7 @@ public class ServerMessageReader {
                         System.out.println(parser.getKeyMessageBody());
                         break;
                     case SERVER_COMMAND_END_SESSION:
-                        System.out.println("Bye " + user.getName());
+                        System.out.println(parser.getKeyMessageBody());
                         reader.close();
                         break;
                     default:

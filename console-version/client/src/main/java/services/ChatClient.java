@@ -37,7 +37,7 @@ public class ChatClient {
 
         new ServerMessageReader(socket, user, parser).read();
 
-        log.debug("Client disconnected");
+//        log.debug("Client disconnected");
     }
 
     private void clearConsole() {

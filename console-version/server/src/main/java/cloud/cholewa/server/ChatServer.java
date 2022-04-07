@@ -46,7 +46,7 @@ public class ChatServer {
     }
 
     private void listen(ServerSocket serverSocket) {
-        //executorService.execute(() -> new ChatChannelsLogger().run());
+        executorService.execute(() -> new ChatChannelsLogger().run());
 
         try {
             while (true) {

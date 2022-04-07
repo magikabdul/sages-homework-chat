@@ -7,13 +7,16 @@ import cloud.cholewa.server.engine.channel.message.ClientMessageParser;
 import cloud.cholewa.server.exceptions.ConnectionLostException;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.CONTROL_COMMAND_END_SESSION;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.HEADER_LOGIN;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.HEADER_LOGOUT;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.MESSAGE_TYPE_SYSTEM;
+import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_END_SESSION;
 
 
 public class Worker implements Runnable {
@@ -62,8 +65,10 @@ public class Worker implements Runnable {
             }
         } else {
             switch (clientMessageParser.getBody()) {
-                case "":
-                    writer.send("", "");
+                case CONTROL_COMMAND_END_SESSION:
+                    writer.send(SERVER_COMMAND_END_SESSION, "Bye " + user.getName());
+                    log.debug(String.format("User \"%s\" left server", user.getName()));
+                    removeWorkerFromServerChannels();
                     break;
                 default:
                     writer.send("", "");
@@ -78,6 +83,12 @@ public class Worker implements Runnable {
                 .collect(Collectors.toList());
 
         channels.forEach(chatChannel -> chatChannel.removeWorker(this));
+
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void registerNewUserLogin(String messageBody) {

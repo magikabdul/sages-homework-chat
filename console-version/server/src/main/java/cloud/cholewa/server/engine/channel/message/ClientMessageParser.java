@@ -14,17 +14,17 @@ public class ClientMessageParser {
     public static final String KEY_MESSAGE_HEADER = "header";
     public static final String KEY_MESSAGE_BODY = "body";
 
+    public static final String CONTROL_COMMAND_END_SESSION = "\\q";
+
     private final HashMap<String, String> keysMap = new HashMap<>();
 
-    public boolean parseToMap(String message) {
+    public void parseToMap(String message) {
         String[] keys = message.split("/");
 
         for (String key : keys) {
             int indexOfColon = key.indexOf(":");
             keysMap.put(key.substring(0, indexOfColon), key.substring(indexOfColon + 1));
         }
-
-        return keysMap.size() == 3;
     }
 
     public String getMessageType() {
