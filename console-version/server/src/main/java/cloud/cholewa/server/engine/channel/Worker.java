@@ -5,6 +5,7 @@ import cloud.cholewa.server.engine.channel.message.ChannelReader;
 import cloud.cholewa.server.engine.channel.message.ChannelWriter;
 import cloud.cholewa.server.engine.channel.message.ClientMessageParser;
 import cloud.cholewa.server.exceptions.ConnectionLostException;
+import lombok.Getter;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.net.Socket;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.CONTROL_COMMAND_EMPTY_BODY;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.CONTROL_COMMAND_END_SESSION;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.HEADER_LOGIN;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.HEADER_LOGOUT;
@@ -23,11 +25,14 @@ public class Worker implements Runnable {
 
     private final Logger log = new BasicServerFactory().createLogger(this.getClass());
 
+    @Getter
     private final User user = new User();
     private final ClientMessageParser clientMessageParser = new ClientMessageParser();
 
     private final Socket socket;
     private final List<ChatChannel> serverChannels;
+
+    @Getter
     private ChannelWriter writer;
 
     public Worker(Socket socket, List<ChatChannel> serverChannels) {
@@ -65,16 +70,28 @@ public class Worker implements Runnable {
             }
         } else {
             switch (clientMessageParser.getBody()) {
+                case CONTROL_COMMAND_EMPTY_BODY:
+                    writer.send("", "");
+                    break;
                 case CONTROL_COMMAND_END_SESSION:
                     writer.send(SERVER_COMMAND_END_SESSION, "Bye " + user.getName());
                     log.debug(String.format("User \"%s\" left server", user.getName()));
                     removeWorkerFromServerChannels();
                     break;
                 default:
+                    broadcastMessageToAllChannelUsers(clientMessageParser.getBody());
                     writer.send("", "");
                     break;
             }
         }
+    }
+
+    private void broadcastMessageToAllChannelUsers(String message) {
+        ChatChannel channel = serverChannels.stream()
+                .filter(chatChannel -> chatChannel.getName().equals(user.getChannel()))
+                .findFirst().orElseThrow();
+
+         channel.broadcast(this, String.format("%s: %s", user.getName(), message));
     }
 
     private void removeWorkerFromServerChannels() {

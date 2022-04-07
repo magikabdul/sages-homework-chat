@@ -1,16 +1,19 @@
 package cloud.cholewa.server.engine.channel;
 
 import cloud.cholewa.server.builders.BasicServerFactory;
+import cloud.cholewa.server.engine.channel.message.ChannelWriter;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_CHAT;
+
 public class GlobalChatChannel implements ChatChannel {
 
     private final Logger log = new BasicServerFactory().createLogger(this.getClass());
 
-    private final String name = "GLOBAL";
+    private final String name = "";
     private final List<Worker> workers = new ArrayList<>();
 
     @Override
@@ -24,8 +27,15 @@ public class GlobalChatChannel implements ChatChannel {
     }
 
     @Override
-    public void broadcast(String message) {
-        //TODO
+    public void broadcast(Worker worker, String message) {
+        workers.stream()
+                .filter(w -> !w.equals(worker))
+                .filter(w -> !w.getUser().getName().isBlank()) //exclude connected but not logged yet
+                .forEach(w -> {
+                    ChannelWriter writer = w.getWriter();
+                    writer.send(SERVER_COMMAND_CHAT, message);
+                    writer.send("", "");
+                });
     }
 
     @Override

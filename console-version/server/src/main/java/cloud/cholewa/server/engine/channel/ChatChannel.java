@@ -4,11 +4,11 @@ import java.util.List;
 
 public interface ChatChannel {
 
-    void addWorker(Worker Worker);
+    void addWorker(Worker worker);
 
-    void removeWorker(Worker Worker);
+    void removeWorker(Worker worker);
 
-    void broadcast(String message);
+    void broadcast(Worker worker, String message);
 
     List<String> retrieveHistory();
 
@@ -16,7 +16,7 @@ public interface ChatChannel {
 
     void transferFile();
 
-    void transferWorker(Worker Worker, ChatChannel chatChannel);
+    void transferWorker(Worker worker, ChatChannel chatChannel);
 
     String getName();
 

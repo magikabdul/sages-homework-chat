@@ -30,7 +30,7 @@ public class PrivateChatChannel implements ChatChannel {
     }
 
     @Override
-    public void broadcast(String message) {
+    public void broadcast(Worker worker, String message) {
         //TODO
     }
 

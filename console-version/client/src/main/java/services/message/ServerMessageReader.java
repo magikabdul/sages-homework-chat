@@ -37,13 +37,14 @@ public class ServerMessageReader {
     }
 
     public void read() {
-        log.setLevel(Level.OFF);
+//        log.setLevel(Level.OFF);
         String message;
 
         try {
             while ((message = reader.readLine()) != null) {
 
                 parser.parseToMap(message);
+//                log.debug("SERVER: " + message);
 
                 switch (parser.getServerCommandType()) {
                     case SERVER_COMMAND_OK:
@@ -53,6 +54,7 @@ public class ServerMessageReader {
                         System.out.print("\n" + "Please enter your name " + PROMPT);
                         break;
                     case SERVER_COMMAND_CHAT:
+                        System.out.println();
                         System.out.println(parser.getKeyMessageBody());
                         break;
                     case SERVER_COMMAND_END_SESSION:

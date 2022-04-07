@@ -14,6 +14,7 @@ public class ClientMessageParser {
     public static final String KEY_MESSAGE_HEADER = "header";
     public static final String KEY_MESSAGE_BODY = "body";
 
+    public static final String CONTROL_COMMAND_EMPTY_BODY = "";
     public static final String CONTROL_COMMAND_END_SESSION = "\\q";
 
     private final HashMap<String, String> keysMap = new HashMap<>();
