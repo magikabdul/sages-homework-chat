@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.CONTROL_COMMAND_CHANNEL_CHANGE;
+import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.CONTROL_COMMAND_DOWNLOAD_CHANNEL_HISTORY;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.CONTROL_COMMAND_EMPTY_BODY;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.CONTROL_COMMAND_END_SESSION;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.HEADER_LOGIN;
@@ -25,6 +26,7 @@ import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.HE
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.MESSAGE_TYPE_SYSTEM;
 import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_CHANNEL;
 import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_END_SESSION;
+import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_HISTORY;
 import static cloud.cholewa.server.helpers.DateTimeService.getCurrentDate;
 import static cloud.cholewa.server.helpers.DateTimeService.getCurrentTime;
 
@@ -96,12 +98,21 @@ public class Worker implements Runnable {
             }
         } else if (message.contains(CONTROL_COMMAND_CHANNEL_CHANGE)) {
             changeChannel(message.substring(2));    //removing \c
+        } else if (message.equals(CONTROL_COMMAND_DOWNLOAD_CHANNEL_HISTORY)) {
+            downloadChannelHistory();
         } else {
             String messageBody = clientMessageParser.getBody();
             broadcastMessageToAllChannelUsers(messageBody);
             historyStorage.save(user.getChannel(), String.format("%s [%s] - %s", getCurrentTime(), user.getName(), messageBody));
             writer.send("", "");
         }
+    }
+
+    private void downloadChannelHistory() {
+        List<String> history = historyStorage.getHistory(user.getChannel());
+
+        history.forEach(s -> writer.send(SERVER_COMMAND_HISTORY, s));
+        writer.send("", "");
     }
 
     private void changeChannel(String newName) {

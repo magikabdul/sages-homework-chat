@@ -13,6 +13,7 @@ public class ServerMessageBuilder {
     public static final String SERVER_COMMAND_CHAT = "CHAT"; //body has message from of other client
     public static final String SERVER_COMMAND_CHANNEL = "CHANNEL";
     public static final String SERVER_COMMAND_END_SESSION = "END";
+    public static final String SERVER_COMMAND_HISTORY = "HISTORY";
 
     public String build(String serverCommand, String messageBody) {
         String messageTemplate = "channel:%s/user:%s/serverCommand:%s/messageBody:%s";
@@ -26,6 +27,8 @@ public class ServerMessageBuilder {
                 return String.format(messageTemplate, user.getChannel(), user.getName(), SERVER_COMMAND_END_SESSION, messageBody);
             case SERVER_COMMAND_CHANNEL:
                 return String.format(messageTemplate, "", "", SERVER_COMMAND_CHANNEL, messageBody);
+            case SERVER_COMMAND_HISTORY:
+                return String.format(messageTemplate, "", "", SERVER_COMMAND_HISTORY, messageBody);
         }
         return String.format(messageTemplate, user.getChannel(), user.getName(), SERVER_COMMAND_OK, "");
     }

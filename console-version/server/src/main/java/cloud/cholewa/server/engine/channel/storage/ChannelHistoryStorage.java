@@ -3,9 +3,13 @@ package cloud.cholewa.server.engine.channel.storage;
 import cloud.cholewa.server.builders.BasicServerFactory;
 import org.apache.log4j.Logger;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -37,34 +41,34 @@ public class ChannelHistoryStorage {
         lock.writeLock().unlock();
     }
 
-    public void getHistory(String channelName) {
+    public List<String> getHistory(String channelName) {
+        List<String> history = new ArrayList<>();
+
+        if (channelName.isBlank()) {
+            channelName = "GLOBAL";
+        }
+
         lock.readLock().lock();
 
-        lock.readLock().unlock();
-    }
+        try (
+                FileReader fileReader = new FileReader(channelName + ".txt");
+                BufferedReader bufferedReader = new BufferedReader(fileReader)
+        ) {
+            history.add("------------------- BEGIN -------------------");
 
-//
-//        public List<String> getHistory(String fileName) {
-//            List<String> history = new ArrayList<>();
-//
-//            lock.writeLock().lock();
-//
-//            try (
-//                    var fileReader = new FileReader(fileName);
-//                    var bufferedReader = new BufferedReader(fileReader)
-//            ) {
-//                String line;
-//                while ((line = bufferedReader.readLine()) != null) {
-//                    history.add(line);
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            lock.writeLock().unlock();
-//
-//            return history;
-//        }
-//    }
-//
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                history.add(line);
+            }
+
+            history.add("------------------- END -------------------");
+
+        } catch (IOException e) {
+            log.error(String.format("Problem with read from file %s", channelName));
+        }
+
+        lock.readLock().unlock();
+
+        return history;
+    }
 }
