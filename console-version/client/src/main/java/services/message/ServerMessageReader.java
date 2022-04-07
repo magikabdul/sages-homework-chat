@@ -1,6 +1,7 @@
 package services.message;
 
 import helpers.BasicClientFactory;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import services.User;
 
@@ -15,6 +16,8 @@ import static services.message.ServerMessageParser.SERVER_COMMAND_LOGIN;
 import static services.message.ServerMessageParser.SERVER_COMMAND_OK;
 
 public class ServerMessageReader {
+
+    public final static String PROMPT = "#> ";
 
     private final Logger log = new BasicClientFactory().createLogger(this.getClass());
     private final ServerMessageParser parser;
@@ -34,11 +37,12 @@ public class ServerMessageReader {
     }
 
     public void read() {
+        log.setLevel(Level.OFF);
         String message;
 
         try {
             while ((message = reader.readLine()) != null) {
-                String PROMPT = "#> ";
+
                 parser.parseToMap(message);
 
                 switch (parser.getServerCommandType()) {

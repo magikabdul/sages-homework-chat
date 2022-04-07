@@ -31,7 +31,7 @@ public class ChatClient {
     public void start() {
         clearConsole();
 
-        Thread thread = new Thread(() -> new ClientMessageWriter(parser).read(socket));
+        Thread thread = new Thread(() -> new ClientMessageWriter(parser, user).read(socket));
         thread.setDaemon(true);
         thread.start();
 
