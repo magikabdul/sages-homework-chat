@@ -4,52 +4,38 @@ import java.util.HashMap;
 
 public class ClientMessageParser {
 
-    static final String MESSAGE_TYPE_SYSTEM = "system";
-    static final String MESSAGE_TYPE_CHAT = "chat";
+    public static final String MESSAGE_TYPE_SYSTEM = "SYSTEM";
+    public static final String MESSAGE_TYPE_CHAT = "CHAT";
 
-    static final String MESSAGE_TYPE_KEY = "messageType";
-    static final String MESSAGE_HEADER_KEY = "messageHeader";
-    static final String MESSAGE_BODY_KEY = "messageBody";
+    public static final String HEADER_LOGIN = "LOGIN";
+    public static final String HEADER_LOGOUT = "LOGOUT";
+
+    public static final String KEY_MESSAGE_TYPE = "type";
+    public static final String KEY_MESSAGE_HEADER = "header";
+    public static final String KEY_MESSAGE_BODY = "body";
 
     private final HashMap<String, String> keysMap = new HashMap<>();
 
-    public boolean isSystemMessage(String message) {
-        parseMessageToMap(message);
-        return !keysMap.get(MESSAGE_TYPE_KEY).isBlank();
-    }
-
-    public HashMap<String, String> parseSystemMessage(String message) {
-        parseMessageToMap(message);
-
-        keysMap.entrySet()
-                .removeIf(e -> e.getKey().equals(MESSAGE_TYPE_KEY)
-                );
-
-        return keysMap;
-    }
-
-    public HashMap<String, String> parseClientMessage(String message) {
-        parseMessageToMap(message);
-
-        keysMap.entrySet()
-                .removeIf(e -> e.getKey().equals(MESSAGE_TYPE_KEY) || e.getKey().equals(MESSAGE_HEADER_KEY)
-                );
-
-        return keysMap;
-    }
-
-
-    void parseMessageToMap(String message) {
+    public boolean parseToMap(String message) {
         String[] keys = message.split("/");
-        int indexOfColon;
 
-        for (String s : keys) {
-            indexOfColon = s.indexOf(":");
-            keysMap.put(s.substring(0, indexOfColon), s.substring(indexOfColon + 1));
+        for (String key : keys) {
+            int indexOfColon = key.indexOf(":");
+            keysMap.put(key.substring(0, indexOfColon), key.substring(indexOfColon + 1));
         }
+
+        return keysMap.size() == 3;
     }
 
-    HashMap<String, String> getKeysMap() {
-        return keysMap;
+    public String getMessageType() {
+        return keysMap.get(KEY_MESSAGE_TYPE);
+    }
+
+    public String getHeader() {
+        return keysMap.get(KEY_MESSAGE_HEADER);
+    }
+
+    public String getBody() {
+        return keysMap.get(KEY_MESSAGE_BODY);
     }
 }
