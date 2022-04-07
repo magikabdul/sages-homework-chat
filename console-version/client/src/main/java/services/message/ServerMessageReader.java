@@ -13,6 +13,7 @@ import java.net.Socket;
 import static services.message.ServerMessageParser.SERVER_COMMAND_CHANNEL;
 import static services.message.ServerMessageParser.SERVER_COMMAND_CHAT;
 import static services.message.ServerMessageParser.SERVER_COMMAND_END_SESSION;
+import static services.message.ServerMessageParser.SERVER_COMMAND_HISTORY;
 import static services.message.ServerMessageParser.SERVER_COMMAND_LOGIN;
 import static services.message.ServerMessageParser.SERVER_COMMAND_OK;
 
@@ -38,7 +39,7 @@ public class ServerMessageReader {
     }
 
     public void read() {
-//        log.setLevel(Level.OFF);
+        log.setLevel(Level.OFF);
         String message;
 
         try {
@@ -61,6 +62,13 @@ public class ServerMessageReader {
                     case SERVER_COMMAND_CHAT:
                         System.out.println();
                         System.out.println(parser.getKeyMessageBody());
+                        break;
+                    case SERVER_COMMAND_HISTORY:
+                        String messageBody = parser.getKeyMessageBody();
+                        if (messageBody.contains("- START -")) {
+                            System.out.println();
+                        }
+                        System.out.println(messageBody);
                         break;
                     case SERVER_COMMAND_END_SESSION:
                         System.out.println(parser.getKeyMessageBody());

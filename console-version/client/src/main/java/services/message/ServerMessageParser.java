@@ -14,6 +14,7 @@ public class ServerMessageParser {
     public static final String SERVER_COMMAND_CHAT = "CHAT"; //body has message from of other client
     public static final String SERVER_COMMAND_CHANNEL = "CHANNEL";
     public static final String SERVER_COMMAND_END_SESSION = "END";
+    public static final String SERVER_COMMAND_HISTORY = "HISTORY";
 
     public static final String KEY_CHANNEL_NAME = "channel";
     public static final String KEY_USER_NAME = "user";
