@@ -1,33 +1,34 @@
 package cloud.cholewa.server.engine.channel;
 
 import cloud.cholewa.server.builders.BasicServerFactory;
+import cloud.cholewa.server.engine.channel.file.FileTransmit;
 import cloud.cholewa.server.engine.channel.message.ChannelReader;
 import cloud.cholewa.server.engine.channel.message.ChannelWriter;
 import cloud.cholewa.server.engine.channel.message.ClientMessageParser;
 import cloud.cholewa.server.engine.channel.storage.ChannelHistoryStorage;
 import cloud.cholewa.server.exceptions.ConnectionLostException;
-import cloud.cholewa.server.helpers.DateTimeService;
 import lombok.Getter;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.CONTROL_COMMAND_CHANNEL_CHANGE;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.CONTROL_COMMAND_DOWNLOAD_CHANNEL_HISTORY;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.CONTROL_COMMAND_EMPTY_BODY;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.CONTROL_COMMAND_END_SESSION;
+import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.CONTROL_COMMAND_FILE_TRANSFER;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.HEADER_LOGIN;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.HEADER_LOGOUT;
 import static cloud.cholewa.server.engine.channel.message.ClientMessageParser.MESSAGE_TYPE_SYSTEM;
 import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_CHANNEL;
 import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_END_SESSION;
+import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_FILE_TRANSFER;
 import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_HISTORY;
-import static cloud.cholewa.server.helpers.DateTimeService.getCurrentDate;
 import static cloud.cholewa.server.helpers.DateTimeService.getCurrentTime;
 
 
@@ -39,7 +40,9 @@ public class Worker implements Runnable {
     private final User user = new User();
     private final ClientMessageParser clientMessageParser = new ClientMessageParser();
     private final ChannelHistoryStorage historyStorage = new ChannelHistoryStorage();
+    private final FileTransmit fileTransmit = new FileTransmit();
 
+    @Getter
     private final Socket socket;
     private final List<ChatChannel> serverChannels;
 
@@ -96,14 +99,47 @@ public class Worker implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (message.contains(CONTROL_COMMAND_CHANNEL_CHANGE)) {
+        } else if (message.startsWith(CONTROL_COMMAND_CHANNEL_CHANGE)) {
             changeChannel(message.substring(2));    //removing \c
         } else if (message.equals(CONTROL_COMMAND_DOWNLOAD_CHANNEL_HISTORY)) {
             downloadChannelHistory();
+        } else if (message.startsWith(CONTROL_COMMAND_FILE_TRANSFER)) {
+            executeFileTransfer(message.substring(2));
         } else {
             String messageBody = clientMessageParser.getBody();
             broadcastMessageToAllChannelUsers(messageBody);
             historyStorage.save(user.getChannel(), String.format("%s [%s] - %s", getCurrentTime(), user.getName(), messageBody));
+            writer.send("", "");
+        }
+    }
+
+    private void executeFileTransfer(String targetUser) {
+        //TODO check if user on online in current channel
+        Worker targetWorker = serverChannels.stream()
+                .filter(channel -> channel.getName().equals(user.getChannel()))
+                .map(ChatChannel::getAllWorkers)
+                .flatMap(Collection::stream)
+                .filter(worker -> worker.getUser().getName().equals(targetUser))
+                .findFirst().orElse(this);
+
+        if (targetWorker.getUser().getName().equals(getUser().getName())) {
+            writer.send(SERVER_COMMAND_FILE_TRANSFER, "Target user not found on this channel");
+            writer.send("", "");
+        } else {
+            log.debug("Starting file transfer to user: " + targetUser);
+            //TODO transfer logic
+            targetWorker.getWriter().send(SERVER_COMMAND_FILE_TRANSFER, "U are receiving file from user: " + getUser().getName());
+//            targetWorker.getWriter().send("", "");
+
+            new Thread(() -> fileTransmit.receive(targetWorker.getSocket(), "ubuntu")).start();
+            new Thread(() -> fileTransmit.send(socket, "F:\\iso\\multipass-1.4.0+win-win64.exe")).start();
+            targetWorker.getWriter().send(SERVER_COMMAND_FILE_TRANSFER, "Transfer finished !!!");
+            targetWorker.getWriter().send("", "");
+
+
+
+            writer.send(SERVER_COMMAND_FILE_TRANSFER, "here should be a file");
+            log.debug("File transfer done");
             writer.send("", "");
         }
     }

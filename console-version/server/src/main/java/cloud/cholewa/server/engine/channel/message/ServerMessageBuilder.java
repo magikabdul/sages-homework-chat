@@ -14,6 +14,7 @@ public class ServerMessageBuilder {
     public static final String SERVER_COMMAND_CHANNEL = "CHANNEL";
     public static final String SERVER_COMMAND_END_SESSION = "END";
     public static final String SERVER_COMMAND_HISTORY = "HISTORY";
+    public static final String SERVER_COMMAND_FILE_TRANSFER = "TRANSFER";
 
     public String build(String serverCommand, String messageBody) {
         String messageTemplate = "channel:%s/user:%s/serverCommand:%s/messageBody:%s";
@@ -29,6 +30,8 @@ public class ServerMessageBuilder {
                 return String.format(messageTemplate, "", "", SERVER_COMMAND_CHANNEL, messageBody);
             case SERVER_COMMAND_HISTORY:
                 return String.format(messageTemplate, "", "", SERVER_COMMAND_HISTORY, messageBody);
+            case SERVER_COMMAND_FILE_TRANSFER:
+                return String.format(messageTemplate, "", "", SERVER_COMMAND_FILE_TRANSFER, messageBody);
         }
         return String.format(messageTemplate, user.getChannel(), user.getName(), SERVER_COMMAND_OK, "");
     }
