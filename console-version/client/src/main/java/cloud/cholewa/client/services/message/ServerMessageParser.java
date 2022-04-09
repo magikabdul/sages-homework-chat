@@ -1,7 +1,7 @@
-package services.message;
+package cloud.cholewa.client.services.message;
 
+import cloud.cholewa.client.services.User;
 import lombok.RequiredArgsConstructor;
-import services.User;
 
 import java.util.HashMap;
 import java.util.Map;

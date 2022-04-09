@@ -1,13 +1,11 @@
-package services.message;
-
-import org.junit.jupiter.api.Test;
+package cloud.cholewa.client.services.message;
 
 //import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static services.message.SocketMessageParser.CHANNEL_NAME_KEY;
-//import static services.message.SocketMessageParser.MESSAGE_BODY_KEY;
-//import static services.message.SocketMessageParser.PROMPT_KEY;
-//import static services.message.SocketMessageParser.SYSTEM_COMMAND_KEY;
-//import static services.message.SocketMessageParser.USER_NAME_KEY;
+//import static cloud.cholewa.client.services.message.SocketMessageParser.CHANNEL_NAME_KEY;
+//import static cloud.cholewa.client.services.message.SocketMessageParser.MESSAGE_BODY_KEY;
+//import static cloud.cholewa.client.services.message.SocketMessageParser.PROMPT_KEY;
+//import static cloud.cholewa.client.services.message.SocketMessageParser.SYSTEM_COMMAND_KEY;
+//import static cloud.cholewa.client.services.message.SocketMessageParser.USER_NAME_KEY;
 
 class SocketMessageParserTest {
 

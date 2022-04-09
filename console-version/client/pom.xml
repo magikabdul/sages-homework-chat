@@ -72,7 +72,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>ChatClientApplication</mainClass>
+                            <mainClass>cloud.cholewa.client.ChatClientApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

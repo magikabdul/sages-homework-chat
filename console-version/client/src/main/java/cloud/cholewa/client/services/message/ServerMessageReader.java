@@ -1,23 +1,23 @@
-package services.message;
+package cloud.cholewa.client.services.message;
 
-import helpers.BasicClientFactory;
+import cloud.cholewa.client.helpers.BasicClientFactory;
+import cloud.cholewa.client.services.User;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import services.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-import static services.message.ServerMessageParser.KEY_CHANNEL_NAME;
-import static services.message.ServerMessageParser.SERVER_COMMAND_CHANNEL;
-import static services.message.ServerMessageParser.SERVER_COMMAND_CHAT;
-import static services.message.ServerMessageParser.SERVER_COMMAND_END_SESSION;
-import static services.message.ServerMessageParser.SERVER_COMMAND_FILE_TRANSFER;
-import static services.message.ServerMessageParser.SERVER_COMMAND_HISTORY;
-import static services.message.ServerMessageParser.SERVER_COMMAND_LOGIN;
-import static services.message.ServerMessageParser.SERVER_COMMAND_OK;
+import static cloud.cholewa.client.services.message.ServerMessageParser.KEY_CHANNEL_NAME;
+import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_CHANNEL;
+import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_CHAT;
+import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_END_SESSION;
+import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_FILE_TRANSFER;
+import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_HISTORY;
+import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_LOGIN;
+import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_OK;
 
 public class ServerMessageReader {
 
@@ -62,7 +62,7 @@ public class ServerMessageReader {
                             System.out.println(parser.getKeyMessageBody());
                             break;
                         case SERVER_COMMAND_CHAT:
-                            System.out.println();
+                            System.out.println("");
                             System.out.println(parser.getKeyMessageBody());
                             break;
                         case SERVER_COMMAND_HISTORY:

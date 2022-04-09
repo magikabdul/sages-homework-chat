@@ -1,4 +1,4 @@
-package services;
+package cloud.cholewa.client.services;
 
 import lombok.Data;
 

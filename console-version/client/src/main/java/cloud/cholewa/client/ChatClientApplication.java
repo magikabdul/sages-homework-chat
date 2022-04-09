@@ -1,4 +1,6 @@
-import services.ChatClient;
+package cloud.cholewa.client;
+
+import cloud.cholewa.client.services.ChatClient;
 
 public class ChatClientApplication {
 

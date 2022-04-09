@@ -1,4 +1,4 @@
-package services.message;
+package cloud.cholewa.client.services.message;
 
 public class ClientMessageBuilder {
 
