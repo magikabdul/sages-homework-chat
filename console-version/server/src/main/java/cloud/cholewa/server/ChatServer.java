@@ -35,6 +35,7 @@ public class ChatServer {
 
     public void start() {
         log.setLevel(Level.ALL);
+        initServerChannelLogger();
 
         try {
             ServerSocket serverSocket = new ServerSocket(port);
@@ -46,8 +47,6 @@ public class ChatServer {
     }
 
     private void listen(ServerSocket serverSocket) {
-        executorService.execute(() -> new ChatChannelsLogger().run());
-
         try {
             while (true) {
                 Socket socket = serverSocket.accept();
@@ -62,10 +61,16 @@ public class ChatServer {
         }
     }
 
-    class ChatChannelsLogger {
+    private void initServerChannelLogger() {
+        Thread serverChannelLogger = new Thread(new ChatChannelsLogger());
+        serverChannelLogger.setDaemon(true);
+        serverChannelLogger.start();
+    }
+
+    class ChatChannelsLogger implements Runnable {
 
         @SneakyThrows
-        private void run() {
+        public void run() {
             Map<String, Integer> channelStatus = new HashMap<>();
 
             ThreadPoolExecutor pool = (ThreadPoolExecutor) executorService;
