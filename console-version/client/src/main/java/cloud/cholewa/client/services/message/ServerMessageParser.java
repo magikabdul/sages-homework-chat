@@ -42,7 +42,7 @@ public class ServerMessageParser {
         return keysMap.get(KEY_SERVER_COMMAND);
     }
 
-    public String getKeyMessageBody() {
+    public String getMessageBody() {
         return keysMap.get(KEY_MESSAGE_BODY);
     }
 }

@@ -59,14 +59,14 @@ public class ServerMessageReader {
                             break;
                         case SERVER_COMMAND_CHANNEL:
                             System.out.println();
-                            System.out.println(parser.getKeyMessageBody());
+                            System.out.println(parser.getMessageBody());
                             break;
                         case SERVER_COMMAND_CHAT:
                             System.out.println("");
-                            System.out.println(parser.getKeyMessageBody());
+                            System.out.println(parser.getMessageBody());
                             break;
                         case SERVER_COMMAND_HISTORY:
-                            String messageBody = parser.getKeyMessageBody();
+                            String messageBody = parser.getMessageBody();
                             if (messageBody.contains("- START -")) {
                                 System.out.println();
                             }
@@ -74,10 +74,10 @@ public class ServerMessageReader {
                             break;
                         case SERVER_COMMAND_FILE_TRANSFER:
                             System.out.println();
-                            System.out.println("File transfer ... " + parser.getKeyMessageBody());
+                            System.out.println("File transfer ... " + parser.getMessageBody());
                             break;
                         case SERVER_COMMAND_END_SESSION:
-                            System.out.println(parser.getKeyMessageBody());
+                            System.out.println(parser.getMessageBody());
                             reader.close();
                             break;
                         default:
