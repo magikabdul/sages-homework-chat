@@ -1,7 +1,7 @@
-package services.message;
+package cloud.cholewa.client.services.message;
 
+import cloud.cholewa.client.services.User;
 import lombok.RequiredArgsConstructor;
-import services.User;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +15,7 @@ public class ServerMessageParser {
     public static final String SERVER_COMMAND_CHANNEL = "CHANNEL";
     public static final String SERVER_COMMAND_END_SESSION = "END";
     public static final String SERVER_COMMAND_HISTORY = "HISTORY";
+    public static final String SERVER_COMMAND_FILE_TRANSFER = "TRANSFER";
 
     public static final String KEY_CHANNEL_NAME = "channel";
     public static final String KEY_USER_NAME = "user";
@@ -41,7 +42,7 @@ public class ServerMessageParser {
         return keysMap.get(KEY_SERVER_COMMAND);
     }
 
-    public String getKeyMessageBody() {
+    public String getMessageBody() {
         return keysMap.get(KEY_MESSAGE_BODY);
     }
 }

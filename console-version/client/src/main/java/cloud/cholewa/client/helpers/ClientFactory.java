@@ -1,4 +1,4 @@
-package helpers;
+package cloud.cholewa.client.helpers;
 
 import org.apache.log4j.Logger;
 

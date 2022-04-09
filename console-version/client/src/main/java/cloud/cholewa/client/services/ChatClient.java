@@ -1,10 +1,10 @@
-package services;
+package cloud.cholewa.client.services;
 
-import helpers.BasicClientFactory;
+import cloud.cholewa.client.helpers.BasicClientFactory;
+import cloud.cholewa.client.services.message.ClientMessageWriter;
+import cloud.cholewa.client.services.message.ServerMessageParser;
+import cloud.cholewa.client.services.message.ServerMessageReader;
 import org.apache.log4j.Logger;
-import services.message.ClientMessageWriter;
-import services.message.ServerMessageParser;
-import services.message.ServerMessageReader;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -36,8 +36,6 @@ public class ChatClient {
         thread.start();
 
         new ServerMessageReader(socket, user, parser).read();
-
-//        log.debug("Client disconnected");
     }
 
     private void clearConsole() {

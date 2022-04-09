@@ -14,7 +14,6 @@ public class ChannelWriter {
     private final Logger log = new BasicServerFactory().createLogger(this.getClass());
     private final ServerMessageBuilder builder;
 
-
     private PrintWriter printWriter;
 
     public ChannelWriter(Socket socket, User user) {
@@ -30,5 +29,4 @@ public class ChannelWriter {
     public void send(@NonNull String systemCommand, @NonNull String messageBody) {
         printWriter.println(builder.build(systemCommand, messageBody));
     }
-
 }

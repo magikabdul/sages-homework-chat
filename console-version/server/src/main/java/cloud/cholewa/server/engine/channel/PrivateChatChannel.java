@@ -6,7 +6,6 @@ import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_CHAT;
 
@@ -44,31 +43,10 @@ public class PrivateChatChannel implements ChatChannel {
                 });
     }
 
-    @Override
-    public List<String> retrieveHistory() {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public List<String> retrieveHistory(String date) {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public void transferFile() {
-        //TODO
-    }
-
-    @Override
-    public void transferWorker(Worker worker, ChatChannel chatChannel) {
-        //TODO
-    }
-
     public void addMember(String name) {
         members.add(name);
     }
+
     public List<String> getAllMembers() {
         return members;
     }
