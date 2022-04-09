@@ -39,28 +39,6 @@ public class GlobalChatChannel implements ChatChannel {
     }
 
     @Override
-    public List<String> retrieveHistory() {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public List<String> retrieveHistory(String date) {
-        //TODO
-        return null;
-    }
-
-    @Override
-    public void transferFile() {
-        //TODO
-    }
-
-    @Override
-    public void transferWorker(Worker worker, ChatChannel chatChannel) {
-        //TODO
-    }
-
-    @Override
     public String getName() {
         return name;
     }

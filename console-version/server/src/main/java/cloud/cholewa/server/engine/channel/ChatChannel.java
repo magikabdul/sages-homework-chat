@@ -10,14 +10,6 @@ public interface ChatChannel {
 
     void broadcast(Worker worker, String message);
 
-    List<String> retrieveHistory();
-
-    List<String> retrieveHistory(String date);
-
-    void transferFile();
-
-    void transferWorker(Worker worker, ChatChannel chatChannel);
-
     String getName();
 
     int getNumberOfLoggedUsers();

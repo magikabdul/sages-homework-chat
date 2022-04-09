@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -135,7 +134,6 @@ public class Worker implements Runnable {
             new Thread(() -> fileTransmit.send(socket, "F:\\iso\\multipass-1.4.0+win-win64.exe")).start();
             targetWorker.getWriter().send(SERVER_COMMAND_FILE_TRANSFER, "Transfer finished !!!");
             targetWorker.getWriter().send("", "");
-
 
 
             writer.send(SERVER_COMMAND_FILE_TRANSFER, "here should be a file");
