@@ -1,6 +1,4 @@
-package cloud.cholewa.chat.commons;
-
-import cloud.cholewa.chat.commons.exceptions.ErrorResponse;
+package cloud.cholewa.chat.commons.exceptions;
 
 import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.core.MediaType;
