@@ -18,13 +18,15 @@ public class UserController {
     private UriInfo uriInfo;
 
     @Inject
+    private UserMapper userMapper;
+
+    @Inject
     private UserService userService;
 
     @POST
     @Path("/register")
     public Response register(@Valid UserRequestDto userRequest) {
-        System.out.println("User registering");
-        userService.register(userRequest);
+        userService.register(userMapper.toDomain(userRequest));
         return Response.created(getLocation("d")).build();
     }
 

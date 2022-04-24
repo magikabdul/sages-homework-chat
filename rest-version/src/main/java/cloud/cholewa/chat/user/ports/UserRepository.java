@@ -8,5 +8,5 @@ public interface UserRepository {
 
     User save(User user);
 
-    Optional<User> find(User user);
+    Optional<User> findByNick(String nick);
 }

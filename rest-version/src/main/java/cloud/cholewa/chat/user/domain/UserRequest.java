@@ -1,4 +1,4 @@
 package cloud.cholewa.chat.user.domain;
 
-public class UserRequest {
+public record UserRequest(String nick, String password) {
 }
