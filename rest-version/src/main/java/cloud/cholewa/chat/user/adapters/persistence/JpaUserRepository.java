@@ -14,14 +14,23 @@ public class JpaUserRepository {
 
     public UserEntity save(UserEntity userEntity) {
         entityManager.persist(userEntity);
+        return findByNick(userEntity.getNick()).orElseThrow();
+    }
+
+    public UserEntity update(UserEntity userEntity) {
+        var userToUpdate = findByNick(userEntity.getNick());
+        if (userToUpdate.isPresent()) {
+            UserEntity entity = userToUpdate.get();
+            entity.updateToken(userEntity.getToken());
+            entityManager.merge(entity);
+        }
         return userEntity;
     }
 
     public Optional<UserEntity> findByNick(String nick) {
         try {
             return Optional.of(
-                    entityManager.createNamedQuery(
-                                    UserEntity.FIND_BY_NICK, UserEntity.class)
+                    entityManager.createNamedQuery(UserEntity.FIND_BY_NICK, UserEntity.class)
                             .setParameter("nick", nick)
                             .getSingleResult()
             );

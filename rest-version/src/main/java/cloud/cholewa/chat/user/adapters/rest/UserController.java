@@ -1,12 +1,15 @@
 package cloud.cholewa.chat.user.adapters.rest;
 
+import cloud.cholewa.chat.user.domain.User;
 import cloud.cholewa.chat.user.ports.UserService;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
@@ -26,15 +29,17 @@ public class UserController {
     @POST
     @Path("/register")
     public Response register(@Valid UserRequestDto userRequest) {
-        userService.register(userMapper.toDomain(userRequest));
-        return Response.created(getLocation("d")).build();
+        User register = userService.register(userMapper.toDomain(userRequest));
+        System.out.println(register);
+        return Response.created(getLocation(userRequest.getNick())).build();
     }
 
     @POST
     @Path("/login")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response login(@Valid UserRequestDto userRequest) {
-        System.out.println("User logging");
-        return Response.accepted().build();
+        String token = userService.login(userMapper.toDomain(userRequest));
+        return Response.accepted().entity(new UserResponse(token)).build();
     }
 
     private URI getLocation(String id) {

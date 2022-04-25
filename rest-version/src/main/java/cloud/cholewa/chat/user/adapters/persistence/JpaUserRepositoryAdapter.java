@@ -19,15 +19,21 @@ public class JpaUserRepositoryAdapter implements UserRepository {
 
     @Override
     public User save(User user) {
-        userRepository.save(userMapper.toEntity(user));
-        return null;
+        UserEntity savedUser = userRepository.save(userMapper.toEntity(user));
+        return userMapper.toDomain(savedUser);
     }
 
     @Override
     public Optional<User> findByNick(String nick) {
         Optional<UserEntity> byNick = userRepository.findByNick(nick);
-
         return byNick.map(userMapper::toDomain);
-//        return Optional.empty();
+    }
+
+    @Override
+    public String updateToken(User user, String token) {
+        UserEntity userEntity = userMapper.toEntity(user);
+        userEntity.updateToken(token);
+
+        return userRepository.update(userEntity).getToken();
     }
 }

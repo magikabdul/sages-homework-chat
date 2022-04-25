@@ -9,4 +9,6 @@ public interface UserRepository {
     User save(User user);
 
     Optional<User> findByNick(String nick);
+
+    String updateToken(User user, String token);
 }
