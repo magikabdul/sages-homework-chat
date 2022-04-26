@@ -1,4 +1,4 @@
-package cloud.cholewa.chat.user.adapters.persistence;
+package cloud.cholewa.chat.infrastructure.persistence.user;
 
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
@@ -7,25 +7,10 @@ import javax.persistence.PersistenceContext;
 import java.util.Optional;
 
 @Singleton
-public class JpaUserRepository {
+public class UserJpaRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
-
-    public UserEntity save(UserEntity userEntity) {
-        entityManager.persist(userEntity);
-        return findByNick(userEntity.getNick()).orElseThrow();
-    }
-
-    public UserEntity update(UserEntity userEntity) {
-        var userToUpdate = findByNick(userEntity.getNick());
-        if (userToUpdate.isPresent()) {
-            UserEntity entity = userToUpdate.get();
-            entity.updateToken(userEntity.getToken());
-            entityManager.merge(entity);
-        }
-        return userEntity;
-    }
 
     public Optional<UserEntity> findByNick(String nick) {
         try {
@@ -37,5 +22,21 @@ public class JpaUserRepository {
         } catch (NoResultException e) {
             return Optional.empty();
         }
+    }
+
+    public UserEntity save(UserEntity userEntity) {
+        entityManager.persist(userEntity);
+        return findByNick(userEntity.getNick()).orElseThrow();
+    }
+
+    public UserEntity update(UserEntity userEntity) {
+        var userToUpdate = findByNick(userEntity.getNick());
+        if (userToUpdate.isPresent()) {
+            var entity = userToUpdate.get();
+            entity.setToken((userEntity.getToken()));
+            entityManager.merge(entity);
+            return entity;
+        }
+        return null;
     }
 }
