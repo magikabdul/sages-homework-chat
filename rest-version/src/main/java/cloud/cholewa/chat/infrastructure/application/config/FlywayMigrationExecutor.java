@@ -1,4 +1,4 @@
-package cloud.cholewa.chat.infrastructure.config;
+package cloud.cholewa.chat.infrastructure.application.config;
 
 import org.flywaydb.core.Flyway;
 
@@ -24,7 +24,12 @@ public class FlywayMigrationExecutor {
                 .dataSource(dataSource)
                 .schemas("public")
                 .load();
-//        flyway.baseline();
-        flyway.migrate();
+
+        try {
+            flyway.migrate();
+        } catch (IllegalStateException e) {
+            flyway.baseline();
+            flyway.migrate();
+        }
     }
 }
