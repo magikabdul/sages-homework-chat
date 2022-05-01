@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static cloud.cholewa.message.MessageType.HISTORY_BEGIN;
+import static cloud.cholewa.message.MessageType.HISTORY_END;
+import static cloud.cholewa.message.MessageType.HISTORY_POSITION;
 import static cloud.cholewa.message.MessageType.REQUEST_FOR_LOGIN;
 import static cloud.cholewa.message.MessageType.RESPONSE_CHANNEL_CHANGE;
 import static cloud.cholewa.message.MessageType.RESPONSE_CHANNEL_CHANGE_ERROR;
@@ -80,9 +83,31 @@ public class Worker implements Runnable {
             case REQUEST_CHANNEL_CHANGE:
                 executeChannelChange(message);
                 break;
+            case HISTORY_REQUEST:
+                downloadHistory();
+                break;
             default:
                 log.error("Unknown client message type");
         }
+    }
+
+    private void downloadHistory() {
+        List<String> history = historyStorage.getHistory(user.getChannel());
+
+        messageWriter.send(Message.builder()
+                .type(HISTORY_BEGIN)
+                .body("------------------- BEGIN -------------------")
+                .build());
+
+        history.forEach(s -> messageWriter.send(Message.builder()
+                .type(HISTORY_POSITION)
+                .body(s)
+                .build()));
+
+        messageWriter.send(Message.builder()
+                .type(HISTORY_END)
+                .body("-------------------- END --------------------")
+                .build());
     }
 
     private void executeChannelChange(Message message) {

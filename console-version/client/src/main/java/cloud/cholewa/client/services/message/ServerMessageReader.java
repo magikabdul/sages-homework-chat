@@ -55,6 +55,16 @@ public class ServerMessageReader {
             case RESPONSE_CHANNEL_CHANGE_ERROR:
                 handleChannelChangeError(message);
                 break;
+            case HISTORY_BEGIN:
+                Console.writeHistoryHeader(message.getBody());
+                break;
+            case HISTORY_POSITION:
+                Console.writeHistoryPosition(message.getBody());
+                break;
+            case HISTORY_END:
+                Console.writeHistoryFooter(message.getBody());
+                showPrompt();
+                break;
             default:
                 showPrompt();
         }

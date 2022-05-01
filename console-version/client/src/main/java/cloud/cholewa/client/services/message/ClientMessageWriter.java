@@ -14,6 +14,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import static cloud.cholewa.message.MessageType.CLIENT_CHAT;
+import static cloud.cholewa.message.MessageType.HISTORY_REQUEST;
 import static cloud.cholewa.message.MessageType.REQUEST_CHANNEL_CHANGE;
 import static cloud.cholewa.message.MessageType.REQUEST_END_SESSION;
 import static cloud.cholewa.message.MessageType.RESPONSE_FOR_LOGIN;
@@ -22,6 +23,7 @@ public class ClientMessageWriter {
 
     private final static String END_SESSION = "\\q";
     private final static String CHANGE_CHANNEL = "\\c";
+    private final static String GET_HISTORY = "\\h";
 
     private final Logger log = new BasicClientFactory().createLogger(this.getClass());
 
@@ -61,6 +63,8 @@ public class ClientMessageWriter {
                 handleEndSession();
             } else if (consoleMessage.startsWith(CHANGE_CHANNEL)) {
                 handleChannelChange(consoleMessage);
+            } else if (consoleMessage.startsWith(GET_HISTORY)) {
+                requestForHistory();
             } else {
                 log.error("Unsupported control command");
                 Console.writePromptMessage(true, chatClient.getUser());
@@ -78,6 +82,13 @@ public class ClientMessageWriter {
             default:
                 sendChatMessage(consoleMessage);
         }
+    }
+
+    @SneakyThrows
+    private void requestForHistory() {
+        objectOutputStream.writeObject(Message.builder()
+                .type(HISTORY_REQUEST)
+                .build());
     }
 
     @SneakyThrows

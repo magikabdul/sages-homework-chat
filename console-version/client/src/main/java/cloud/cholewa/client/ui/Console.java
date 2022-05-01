@@ -75,4 +75,32 @@ public class Console {
                 .append("\n");
         System.out.println(sb);
     }
+
+    public static void writeHistoryHeader(String body) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n")
+                .append(ConsoleColor.RED_BACKGROUND)
+                .append(body)
+                .append(ConsoleColor.RESET)
+                .append("\n");
+        System.out.println(sb);
+    }
+
+    public static void writeHistoryPosition(String body) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColor.WHITE_BOLD)
+                .append(body)
+                .append(ConsoleColor.RESET);
+        System.out.println(sb);
+    }
+
+    public static void writeHistoryFooter(String body) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n")
+                .append(ConsoleColor.GREEN_BACKGROUND)
+                .append(body)
+                .append(ConsoleColor.RESET)
+                .append("\n");
+        System.out.println(sb);
+    }
 }
