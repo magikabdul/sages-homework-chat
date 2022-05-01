@@ -34,7 +34,6 @@ Do kanału może się zalogować tylko użytkownik, który ma do niego uprawnien
 zostali przypisani użytkownicy według poniższej listy.
 
 
-
 ### games
 - kris
 - tom
@@ -46,11 +45,23 @@ zostali przypisani użytkownicy według poniższej listy.
 - thomas
 - liv
 
-Serwer na bieżąco zapisuje historię rozmów. Użytkownik może pobrać historię danego kanału za pomocą polecenia `\d`.
+Serwer na bieżąco zapisuje historię rozmów. Użytkownik może pobrać historię danego kanału za pomocą polecenia `\h`.
 Historię można pobrać tylko dla kanału, na którym znajduje się użytkownik. Nie ma zatem możliwości pobranie historii kanału,
 do którego użytkownik nie może się zalogować.
 
 ![history](client/screens/05-history.png)
+
+Serwer pozwala na przesyłanie plików pomiędzy użytkownikami w obrębie kanału. Przesłanie pliku jest możliwe tylko pomiędzy
+zalogowanymi użytkownikami.
+![file](client/screens/07-file-transfer-active-users.png)
+Wskazanie nieistniejącego odbiorcy pliku powoduje wyświetlenie komunikatu o błędzie.
+![file](client/screens/07-file-transfer-error.png)
+Przesłanie pliku dokonujemy za pomocą polecenia `\f<nazwa-pliku>-<odbiorca>` np. `\fa.jpg-tom`.
+![file](client/screens/07-file-transfer-begin.png)
+Po zainicjowaniu wysłania pliku, zdalna strona musi potwierdzić odbiór, wydając polecenie `\r`.
+![file](client/screens/07-file-transfer-done.png)
+![file](client/screens/07-file-transfer-conversation.png)
+
 
 Zakończenie pracy następuje po wydaniu polecenia `\q`. Działa na dowolnym poziomie chat-u.
 
