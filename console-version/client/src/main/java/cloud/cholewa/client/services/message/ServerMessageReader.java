@@ -48,13 +48,32 @@ public class ServerMessageReader {
                 break;
             case SERVER_CHAT:
                 processServerBroadcast(message);
+                break;
+            case RESPONSE_CHANNEL_CHANGE:
+                updateChannelData(message);
+                break;
+            case RESPONSE_CHANNEL_CHANGE_ERROR:
+                handleChannelChangeError(message);
+                break;
             default:
                 showPrompt();
         }
     }
 
+    private void handleChannelChangeError(Message message) {
+        Console.writeErrorMessage(true, message.getBody(), false);
+        showPrompt();
+    }
+
+
+    private void updateChannelData(Message message) {
+        chatClient.getUser().setChannel(message.getChannel());
+        showPrompt();
+    }
+
     private void processServerBroadcast(Message message) {
         Console.writeServerBroadcast(message.getUser(), message.getChannel(), message.getBody());
+        showPrompt();
     }
 
     private void showPrompt() {

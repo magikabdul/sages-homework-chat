@@ -14,8 +14,12 @@ import org.apache.log4j.Logger;
 
 import java.net.Socket;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static cloud.cholewa.message.MessageType.REQUEST_FOR_LOGIN;
+import static cloud.cholewa.message.MessageType.RESPONSE_CHANNEL_CHANGE;
+import static cloud.cholewa.message.MessageType.RESPONSE_CHANNEL_CHANGE_ERROR;
 import static cloud.cholewa.message.MessageType.SERVER_OK;
 
 
@@ -74,9 +78,67 @@ public class Worker implements Runnable {
             case CLIENT_CHAT:
                 broadcastClientMessage(message);
                 break;
+            case REQUEST_CHANNEL_CHANGE:
+                executeChannelChange(message);
+                break;
             default:
                 log.error("Unknown client message type");
         }
+    }
+
+    private void executeChannelChange(Message message) {
+        if (message.getChannel().isBlank()) {
+            switchToChannel(message.getChannel());
+        } else {
+
+            Optional<ChatChannel> channel = serverChannels.stream()
+                    .filter(chatChannel -> chatChannel.getName().equals(message.getChannel()))
+                    .findFirst();
+
+            if (channel.isPresent()) {
+                PrivateChatChannel privateChatChannel = (PrivateChatChannel) channel.get();
+
+                Optional<String> anyMember = privateChatChannel.getAllMembers().stream()
+                        .filter(m -> m.equals(message.getUser()))
+                        .findAny();
+
+                if (anyMember.isPresent()) {
+                    switchToChannel(message.getChannel());
+                } else {
+                    messageWriter.send(Message.builder()
+                            .user(getUser().getName())
+                            .user(getUser().getChannel())
+                            .type(RESPONSE_CHANNEL_CHANGE_ERROR)
+                            .body("Error - No permission to join to channel: " + message.getChannel())
+                            .build());
+                }
+
+            } else {
+                messageWriter.send(Message.builder()
+                        .user(getUser().getName())
+                        .channel(getUser().getChannel())
+                        .type(RESPONSE_CHANNEL_CHANGE_ERROR)
+                        .body("Error - channel doesn't exists")
+                        .build());
+            }
+        }
+    }
+
+    private void switchToChannel(String name) {
+        ChatChannel channel = serverChannels.stream()
+                .filter(chatChannel -> chatChannel.getName().equals(name))
+                .findFirst()
+                .orElseThrow();
+
+        removeWorkerFromServerChannels();
+        channel.getAllWorkers().add(this);
+        user.setChannel(name);
+
+        messageWriter.send(Message.builder()
+                .user(user.getName())
+                .channel(user.getChannel())
+                .type(RESPONSE_CHANNEL_CHANGE)
+                .build());
     }
 
     private void broadcastClientMessage(Message message) {
@@ -119,49 +181,7 @@ public class Worker implements Runnable {
                 .forEach(chatChannel -> chatChannel.removeWorker(this));
     }
 
-//    private void processIncomingMessage(String message) {
-//        log.debug("CLIENT MESSAGE: " + message);
-//        clientMessageParser.parseToMap(message);
 //
-//        if (clientMessageParser.getMessageType().equals(MESSAGE_TYPE_SYSTEM)) {
-//            switch (clientMessageParser.getHeader()) {
-//                case HEADER_LOGIN:
-//                    registerNewUserLogin(clientMessageParser.getBody());
-//                    writer.send("", "");
-//                    break;
-//                case HEADER_LOGOUT:
-//                    writer.send("", "");
-//                    break;
-//            }
-//        } else {
-//            processClientMessageType(clientMessageParser.getBody());
-//        }
-//    }
-//
-//    private void processClientMessageType(String message) {
-//        if (message.equals(CONTROL_COMMAND_EMPTY_BODY)) {
-//            writer.send("", "");
-//        } else if (message.equals(CONTROL_COMMAND_END_SESSION)) {
-//            writer.send(SERVER_COMMAND_END_SESSION, "Bye " + user.getName());
-//            log.debug(String.format("User \"%s\" left server", user.getName()));
-//            removeWorkerFromServerChannels();
-//            try {
-//                messageSocket.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        } else if (message.startsWith(CONTROL_COMMAND_CHANNEL_CHANGE)) {
-//            changeChannel(message.substring(2));    //removing \c
-//        } else if (message.equals(CONTROL_COMMAND_DOWNLOAD_CHANNEL_HISTORY)) {
-//            downloadChannelHistory();
-//        } else if (message.startsWith(CONTROL_COMMAND_FILE_TRANSFER)) {
-//            executeFileTransfer(message.substring(2));
-//        } else {
-//            String messageBody = clientMessageParser.getBody();
-//            broadcastMessageToAllChannelUsers(messageBody);
-//            historyStorage.save(user.getChannel(), String.format("%s [%s] - %s", getCurrentTime(), user.getName(), messageBody));
-//            writer.send("", "");
-//        }
 //    }
 //
 //    private void executeFileTransfer(String targetUser) {

@@ -14,12 +14,14 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import static cloud.cholewa.message.MessageType.CLIENT_CHAT;
+import static cloud.cholewa.message.MessageType.REQUEST_CHANNEL_CHANGE;
 import static cloud.cholewa.message.MessageType.REQUEST_END_SESSION;
 import static cloud.cholewa.message.MessageType.RESPONSE_FOR_LOGIN;
 
 public class ClientMessageWriter {
 
     private final static String END_SESSION = "\\q";
+    private final static String CHANGE_CHANNEL = "\\c";
 
     private final Logger log = new BasicClientFactory().createLogger(this.getClass());
 
@@ -55,13 +57,13 @@ public class ClientMessageWriter {
 
     private void processClientCommand(String consoleMessage) {
         if (consoleMessage.charAt(0) == '\\') {
-            switch (consoleMessage) {
-                case END_SESSION:
-                    handleEndSession();
-                    break;
-                default:
-                    log.error("Unsupported control command");
-//                    sendChatMessage();
+            if (consoleMessage.startsWith(END_SESSION)) {
+                handleEndSession();
+            } else if (consoleMessage.startsWith(CHANGE_CHANNEL)) {
+                handleChannelChange(consoleMessage);
+            } else {
+                log.error("Unsupported control command");
+                Console.writePromptMessage(true, chatClient.getUser());
             }
         } else {
             Console.writeWarningMessage(true, "Invalid usage of control character \\", true);
@@ -76,6 +78,15 @@ public class ClientMessageWriter {
             default:
                 sendChatMessage(consoleMessage);
         }
+    }
+
+    @SneakyThrows
+    private void handleChannelChange(String consoleMessage) {
+        objectOutputStream.writeObject(Message.builder()
+                .user(chatClient.getUser().getName())
+                .channel(consoleMessage.substring(2).toUpperCase())
+                .type(REQUEST_CHANNEL_CHANGE)
+                .build());
     }
 
     @SneakyThrows
