@@ -15,6 +15,9 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Optional;
 
+import static cloud.cholewa.message.MessageType.FILE_RECEIVE_REQUEST;
+import static cloud.cholewa.message.MessageType.FILE_TRANSFER_ERROR;
+import static cloud.cholewa.message.MessageType.FILE_TRANSFER_REQUEST;
 import static cloud.cholewa.message.MessageType.HISTORY_BEGIN;
 import static cloud.cholewa.message.MessageType.HISTORY_END;
 import static cloud.cholewa.message.MessageType.HISTORY_POSITION;
@@ -84,8 +87,62 @@ public class Worker implements Runnable {
             case HISTORY_REQUEST:
                 downloadHistory();
                 break;
+            case FILE_SENDING_NOTIFY:
+                processFileSendingNotify(message);
+                break;
+            case FILE_RECEIVING_FROM_SERVER_READY:
+                sendFileFromServer(message);
+                break;
             default:
                 log.error("Unknown client message type");
+        }
+    }
+
+    private void sendFileFromServer(Message message) {
+        String fileName = message.getBody().split("/")[0].split(":")[1];
+
+        fileTransmit.send(fileSocket, "server-" + fileName);
+
+        messageWriter.send(Message.builder()
+                .user(user.getName())
+                .channel(user.getChannel())
+                .type(SERVER_OK)
+                .body("")
+                .build());
+    }
+
+    private void processFileSendingNotify(Message message) {
+        String[] transferData = message.getBody().split("/");
+        String fileName = transferData[0].split(":")[1];
+        String targetUser = transferData[1].split(":")[1];
+
+
+        ChatChannel channel = serverChannels.stream()
+                .filter(chatChannel -> chatChannel.getName().equals(message.getChannel()))
+                .findFirst()
+                .orElseThrow();
+
+        Optional<Worker> targetWorker = channel.getAllWorkers().stream()
+                .filter(worker -> worker.getUser().getName().equals(targetUser))
+                .findFirst();
+
+        if (targetWorker.isPresent()) {
+            messageWriter.send(Message.builder()
+                    .type(FILE_TRANSFER_REQUEST)
+                    .body(message.getBody())
+                    .build());
+            fileTransmit.receive(fileSocket, fileName);
+
+            targetWorker.get().messageWriter.send(Message.builder()
+                    .type(FILE_RECEIVE_REQUEST)
+                    .body(message.getBody())
+                    .build());
+
+        } else {
+            messageWriter.send(Message.builder()
+                    .type(FILE_TRANSFER_ERROR)
+                    .body("Target user not found on current channel")
+                    .build());
         }
     }
 
@@ -204,44 +261,4 @@ public class Worker implements Runnable {
                 .filter(chatChannel -> chatChannel.getAllWorkers().contains(this))
                 .forEach(chatChannel -> chatChannel.removeWorker(this));
     }
-
-//
-//    }
-//
-//    private void executeFileTransfer(String targetUser) {
-//        //TODO check if user on online in current channel
-//        Worker targetWorker = serverChannels.stream()
-//                .filter(channel -> channel.getName().equals(user.getChannel()))
-//                .map(ChatChannel::getAllWorkers)
-//                .flatMap(Collection::stream)
-//                .filter(worker -> worker.getUser().getName().equals(targetUser))
-//                .findFirst().orElse(this);
-//
-//        if (targetWorker.getUser().getName().equals(getUser().getName())) {
-//            writer.send(SERVER_COMMAND_FILE_TRANSFER, "Target user not found on this channel");
-//            writer.send("", "");
-//        } else {
-//            log.debug("Starting file transfer to user: " + targetUser);
-//            //TODO transfer logic
-//            targetWorker.getWriter().send(SERVER_COMMAND_FILE_TRANSFER, "U are receiving file from user: " + getUser().getName());
-////            targetWorker.getWriter().send("", "");
-//
-//            new Thread(() -> fileTransmit.receive(targetWorker.getMessageSocket(), "ubuntu")).start();
-//            new Thread(() -> fileTransmit.send(messageSocket, "F:\\iso\\multipass-1.4.0+win-win64.exe")).start();
-//            targetWorker.getWriter().send(SERVER_COMMAND_FILE_TRANSFER, "Transfer finished !!!");
-//            targetWorker.getWriter().send("", "");
-//
-//
-//            writer.send(SERVER_COMMAND_FILE_TRANSFER, "here should be a file");
-//            log.debug("File transfer done");
-//            writer.send("", "");
-//        }
-//    }
-//
-//    private void downloadChannelHistory() {
-//        List<String> history = historyStorage.getHistory(user.getChannel());
-//
-//        history.forEach(s -> writer.send(SERVER_COMMAND_HISTORY, s));
-//        writer.send("", "");
-
 }

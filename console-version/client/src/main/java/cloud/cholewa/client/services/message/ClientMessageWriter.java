@@ -2,8 +2,10 @@ package cloud.cholewa.client.services.message;
 
 import cloud.cholewa.client.helpers.BasicClientFactory;
 import cloud.cholewa.client.services.ChatClient;
+import cloud.cholewa.client.services.file.FileTransmit;
 import cloud.cholewa.client.ui.Console;
 import cloud.cholewa.message.Message;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import org.apache.log4j.Logger;
 
@@ -14,6 +16,8 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import static cloud.cholewa.message.MessageType.CLIENT_CHAT;
+import static cloud.cholewa.message.MessageType.FILE_RECEIVING_FROM_SERVER_READY;
+import static cloud.cholewa.message.MessageType.FILE_SENDING_NOTIFY;
 import static cloud.cholewa.message.MessageType.HISTORY_REQUEST;
 import static cloud.cholewa.message.MessageType.REQUEST_CHANNEL_CHANGE;
 import static cloud.cholewa.message.MessageType.REQUEST_END_SESSION;
@@ -24,8 +28,11 @@ public class ClientMessageWriter {
     private final static String END_SESSION = "\\q";
     private final static String CHANGE_CHANNEL = "\\c";
     private final static String GET_HISTORY = "\\h";
+    private final static String FILE_TRANSFER = "\\f";
+    private final static String FILE_RECEIVE = "\\r";
 
     private final Logger log = new BasicClientFactory().createLogger(this.getClass());
+    private final FileTransmit fileTransmit = new FileTransmit();
 
     private ObjectOutputStream objectOutputStream;
     private final ChatClient chatClient;
@@ -65,6 +72,10 @@ public class ClientMessageWriter {
                 handleChannelChange(consoleMessage);
             } else if (consoleMessage.startsWith(GET_HISTORY)) {
                 requestForHistory();
+            } else if (consoleMessage.startsWith(FILE_TRANSFER)) {
+                initiateFileTransfer(consoleMessage);
+            } else if (consoleMessage.startsWith(FILE_RECEIVE)) {
+                processFileReceive(consoleMessage);
             } else {
                 log.error("Unsupported control command");
                 Console.writePromptMessage(true, chatClient.getUser());
@@ -74,6 +85,17 @@ public class ClientMessageWriter {
         }
     }
 
+    @SneakyThrows
+    private void processFileReceive(String consoleMessage) {
+        String fileName = chatClient.getLastServerMessage().getBody().split("/")[0].split(":")[1];
+        objectOutputStream.writeObject(Message.builder()
+                .type(FILE_RECEIVING_FROM_SERVER_READY)
+                .body(chatClient.getLastServerMessage().getBody())
+                .build());
+
+        fileTransmit.receive(chatClient.getFileSocket(), chatClient.getUser().getName() + "-" + fileName);
+    }
+
     private void processServerCommand(String consoleMessage) {
         switch (chatClient.getLastServerMessage().getType()) {
             case REQUEST_FOR_LOGIN:
@@ -81,6 +103,26 @@ public class ClientMessageWriter {
                 break;
             default:
                 sendChatMessage(consoleMessage);
+        }
+    }
+
+    @SneakyThrows
+    private void initiateFileTransfer(String consoleMessage) {
+        String command = consoleMessage.substring(2);
+        String[] transferData = command.split("-");
+
+        if (transferData.length < 2) {
+            Console.writeErrorMessage(true, "Missing file name or target user", true);
+        } else {
+            String fileName = transferData[0];
+            String targetUser = transferData[1];
+
+            objectOutputStream.writeObject(Message.builder()
+                    .user(chatClient.getUser().getName())
+                    .channel(chatClient.getUser().getChannel())
+                    .type(FILE_SENDING_NOTIFY)
+                    .body("fileName:" + fileName + "/" + "targetUser:" + targetUser)
+                    .build());
         }
     }
 
