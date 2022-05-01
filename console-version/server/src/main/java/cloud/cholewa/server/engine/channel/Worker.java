@@ -9,6 +9,7 @@ import cloud.cholewa.server.engine.channel.message.ClientMessageParser;
 import cloud.cholewa.server.engine.channel.storage.ChannelHistoryStorage;
 import cloud.cholewa.server.exceptions.ConnectionLostException;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.apache.log4j.Logger;
 
 import java.net.Socket;
@@ -66,9 +67,20 @@ public class Worker implements Runnable {
         switch (message.getType()) {
             case RESPONSE_FOR_LOGIN:
                 responseForLogin(message);
+                break;
+            case REQUEST_END_SESSION:
+                executeEndSession();
+                break;
             default:
                 log.error("Unknown client message type");
         }
+    }
+
+    @SneakyThrows
+    private void executeEndSession() {
+        removeWorkerFromServerChannels();
+        messageSocket.close();
+        fileSocket.close();
     }
 
     private void responseForLogin(Message message) {

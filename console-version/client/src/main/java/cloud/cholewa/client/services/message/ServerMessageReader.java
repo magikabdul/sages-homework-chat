@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import java.io.EOFException;
 import java.io.ObjectInputStream;
 
 public class ServerMessageReader {
@@ -29,10 +30,14 @@ public class ServerMessageReader {
     public void read() {
         log.setLevel(Level.OFF);
 
-        while (true) {
-            Message message = (Message) objectInputStream.readObject();
-            chatClient.setLastServerMessage(message);
-            processInputMessage(message);
+        try {
+            while (true) {
+                Message message = (Message) objectInputStream.readObject();
+                chatClient.setLastServerMessage(message);
+                processInputMessage(message);
+            }
+        } catch (EOFException e) {
+            Console.writeSuccessMessage(true, "Bye. User correctly logged out\n", false);
         }
     }
 

@@ -10,6 +10,16 @@ public class Console {
         System.out.print("\033[H\033[2J");
     }
 
+    public static void writeSuccessMessage(boolean inNewLine, String body, boolean withPrompt) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(inNewLine ? "\n" : "");
+        sb.append(ConsoleColor.CYAN_BACKGROUND)
+                .append(body)
+                .append(ConsoleColor.RESET);
+        sb.append(withPrompt ? PROMPT : "");
+        System.out.print(sb);
+    }
+
     public static void writeInfoMessage(boolean inNewLine, String body, boolean withPrompt) {
         StringBuilder sb = new StringBuilder();
         sb.append(inNewLine ? "\n" : "");
@@ -21,6 +31,16 @@ public class Console {
     }
 
     public static void writeWarningMessage(boolean inNewLine, String body, boolean withPrompt) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(inNewLine ? "\n" : "");
+        sb.append(ConsoleColor.YELLOW_BOLD)
+                .append(body)
+                .append(ConsoleColor.RESET);
+        sb.append(withPrompt ? PROMPT : "");
+        System.out.print(sb);
+    }
+
+    public static void writeErrorMessage(boolean inNewLine, String body, boolean withPrompt) {
         StringBuilder sb = new StringBuilder();
         sb.append(inNewLine ? "\n" : "");
         sb.append(ConsoleColor.RED_BOLD)

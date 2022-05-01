@@ -13,9 +13,12 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import static cloud.cholewa.message.MessageType.REQUEST_END_SESSION;
 import static cloud.cholewa.message.MessageType.RESPONSE_FOR_LOGIN;
 
 public class ClientMessageWriter {
+
+    private final static String END_SESSION = "\\q";
 
     private final Logger log = new BasicClientFactory().createLogger(this.getClass());
 
@@ -41,14 +44,46 @@ public class ClientMessageWriter {
         while (true) {
             String consoleMessage = reader.readLine();
 
-            switch (chatClient.getLastServerMessage().getType()) {
-                case REQUEST_FOR_LOGIN:
-                    handleLoginRequest(consoleMessage);
-                    break;
-                default:
-                    handleShowPrompt();
+            if (consoleMessage.contains("\\")) {
+                processClientCommand(consoleMessage);
+            } else {
+                processServerCommand(consoleMessage);
             }
         }
+    }
+
+    private void processClientCommand(String consoleMessage) {
+        if (consoleMessage.charAt(0) == '\\') {
+            switch (consoleMessage) {
+                case END_SESSION:
+                    handleEndSession();
+                    break;
+                default:
+                    log.error("Unsupported control command");
+                    handleShowPrompt();
+            }
+        } else {
+            Console.writeWarningMessage(true, "Invalid usage of control character \\", true);
+        }
+    }
+
+    private void processServerCommand(String consoleMessage) {
+        switch (chatClient.getLastServerMessage().getType()) {
+            case REQUEST_FOR_LOGIN:
+                handleLoginRequest(consoleMessage);
+                break;
+            default:
+                handleShowPrompt();
+        }
+    }
+
+    @SneakyThrows
+    private void handleEndSession() {
+        objectOutputStream.writeObject(Message.builder()
+                .user(chatClient.getUser().getName())
+                .channel(chatClient.getUser().getChannel())
+                .type(REQUEST_END_SESSION)
+                .build());
     }
 
     private void handleShowPrompt() {
@@ -58,7 +93,7 @@ public class ClientMessageWriter {
     @SneakyThrows
     private void handleLoginRequest(String consoleMessage) {
         if (consoleMessage.length() <= 1) {
-            Console.writeWarningMessage(true, "Login too short, use another one", true);
+            Console.writeErrorMessage(true, "Login too short, use another one", true);
         } else {
             chatClient.getUser().setName(consoleMessage);
             objectOutputStream.writeObject(Message.builder()
