@@ -29,7 +29,6 @@ public class Worker implements Runnable {
 
     @Getter
     private final User user = new User();
-    private final ClientMessageParser clientMessageParser = new ClientMessageParser();
     private final ChannelHistoryStorage historyStorage = new ChannelHistoryStorage();
     private final FileTransmit fileTransmit = new FileTransmit();
 
@@ -145,6 +144,8 @@ public class Worker implements Runnable {
         user.setName(message.getUser());
         user.setChannel(message.getChannel());
 
+        historyStorage.save(message.getChannel(), message);
+
         serverChannels.stream()
                 .filter(chatChannel -> chatChannel.getAllWorkers().contains(this))
                 .findAny().orElseThrow()
@@ -219,44 +220,5 @@ public class Worker implements Runnable {
 //
 //        history.forEach(s -> writer.send(SERVER_COMMAND_HISTORY, s));
 //        writer.send("", "");
-//    }
-//
-//    private void changeChannel(String newName) {
-//        String newChannelName = newName.toUpperCase();
-//
-//        if (serverChannels.stream().map(ChatChannel::getName).anyMatch(s -> s.equals(newChannelName))) {
-//            if (!newChannelName.isBlank()) {
-//                PrivateChatChannel channel = (PrivateChatChannel) serverChannels.stream().filter(chatChannel -> chatChannel.getName().equals(newChannelName)).findFirst().orElseThrow();
-//                if (channel.getAllMembers().contains(user.getName())) {
-//                    removeWorkerFromServerChannels();
-//                    channel.addWorker(this);
-//                    user.setChannel(newChannelName);
-//                    writer.send("", "");
-//                    log.debug(String.format("User %s has moved to channel %s", user.getName(), newChannelName));
-//                } else {
-//                    writer.send(SERVER_COMMAND_CHANNEL, String.format("User \"%s\" has no permission to switch to channel \"%s\"", user.getName(), newChannelName));
-//                    writer.send("", "");
-//                }
-//            } else {
-//                removeWorkerFromServerChannels();
-//                ChatChannel globalChannel = serverChannels.stream().filter(chatChannel -> chatChannel.getName().equals("")).findFirst().orElseThrow();
-//                globalChannel.addWorker(this);
-//                user.setChannel("");
-//                writer.send("", "");
-//                log.debug(String.format("User %s has moved to main channel", user.getName()));
-//            }
-//
-//        } else {
-//            writer.send(SERVER_COMMAND_CHANNEL, String.format("Channel \"%s\" doesn't found on server channels list", newChannelName));
-//            writer.send("", "");
-//        }
-//    }
-//
-//    private void broadcastMessageToAllChannelUsers(String message) {
-//        ChatChannel channel = serverChannels.stream()
-//                .filter(chatChannel -> chatChannel.getName().equals(user.getChannel()))
-//                .findFirst().orElseThrow();
-//
-//        channel.broadcast(this, String.format("%s: %s", user.getName(), message));
-//    }
+
 }
