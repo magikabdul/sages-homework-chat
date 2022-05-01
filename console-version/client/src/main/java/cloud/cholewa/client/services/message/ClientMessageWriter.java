@@ -1,66 +1,72 @@
 package cloud.cholewa.client.services.message;
 
 import cloud.cholewa.client.helpers.BasicClientFactory;
-import cloud.cholewa.client.services.User;
-import lombok.RequiredArgsConstructor;
+import cloud.cholewa.client.services.ChatClient;
+import cloud.cholewa.client.ui.Console;
+import cloud.cholewa.message.Message;
+import lombok.SneakyThrows;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import static cloud.cholewa.client.services.message.ClientMessageBuilder.HEADER_LOGIN;
-import static cloud.cholewa.client.services.message.ClientMessageBuilder.MESSAGE_TYPE_CHAT;
-import static cloud.cholewa.client.services.message.ClientMessageBuilder.MESSAGE_TYPE_SYSTEM;
-import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_LOGIN;
-import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_OK;
-import static cloud.cholewa.client.services.message.ServerMessageReader.PROMPT;
+import static cloud.cholewa.message.MessageType.RESPONSE_FOR_LOGIN;
 
-@RequiredArgsConstructor
 public class ClientMessageWriter {
 
     private final Logger log = new BasicClientFactory().createLogger(this.getClass());
 
-    private PrintWriter writer;
-    private final ServerMessageParser parser;
-    private final User user;
+    private ObjectOutputStream objectOutputStream;
+    private final ChatClient chatClient;
 
-    public void read(Socket socket) {
+    public ClientMessageWriter(ChatClient chatClient, Socket messageSocket) {
+        this.chatClient = chatClient;
 
         try {
-            writer = new PrintWriter(socket.getOutputStream(), true);
+            objectOutputStream = new ObjectOutputStream(messageSocket.getOutputStream());
         } catch (IOException e) {
             log.error("Opening OutputStream error: " + e.getMessage());
         }
+    }
+
+    @SuppressWarnings("InfiniteLoopStatement")
+    @SneakyThrows
+    public void send() {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        ClientMessageBuilder builder = new ClientMessageBuilder();
 
         while (true) {
-            try {
-                String consoleMessage = reader.readLine();
-                String serverCommandType = parser.getServerCommandType();
+            String consoleMessage = reader.readLine();
 
-                if (consoleMessage.contains("/")) {
-                    System.out.println("Invalid char in message. Usage of \"/\" is not allowed");
-                    System.out.print("" + user.getChannel() + "/" + user.getName() + PROMPT);
-                } else {
-
-                    switch (serverCommandType) {
-                        case SERVER_COMMAND_OK:
-                            writer.println(builder.build(MESSAGE_TYPE_CHAT, "", consoleMessage));
-                            break;
-                        case SERVER_COMMAND_LOGIN:
-                            writer.println(builder.build(MESSAGE_TYPE_SYSTEM, HEADER_LOGIN, consoleMessage));
-                            break;
-                    }
-                }
-
-            } catch (IOException e) {
-                log.error("Reading from BufferedReader error: " + e.getMessage());
+            switch (chatClient.getLastServerMessage().getType()) {
+                case REQUEST_FOR_LOGIN:
+                    handleLoginRequest(consoleMessage);
+                    break;
+                default:
+                    handleShowPrompt();
             }
+        }
+    }
+
+    private void handleShowPrompt() {
+        Console.writePromptMessage(true, chatClient.getUser());
+    }
+
+    @SneakyThrows
+    private void handleLoginRequest(String consoleMessage) {
+        if (consoleMessage.length() <= 1) {
+            Console.writeWarningMessage(true, "Login too short, use another one", true);
+        } else {
+            chatClient.getUser().setName(consoleMessage);
+            objectOutputStream.writeObject(Message.builder()
+                    .user(chatClient.getUser().getName())
+                    .channel(chatClient.getUser().getChannel())
+                    .type(RESPONSE_FOR_LOGIN)
+                    .body("")
+                    .build());
         }
     }
 }

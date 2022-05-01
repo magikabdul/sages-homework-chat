@@ -28,14 +28,14 @@ public class GlobalChatChannel implements ChatChannel {
 
     @Override
     public void broadcast(Worker worker, String message) {
-        workers.stream()
-                .filter(w -> !w.equals(worker))
-                .filter(w -> !w.getUser().getName().isBlank()) //exclude connected but not logged yet
-                .forEach(w -> {
-                    ChannelWriter writer = w.getWriter();
-                    writer.send(SERVER_COMMAND_CHAT, message);
-                    writer.send("", "");
-                });
+//        workers.stream()
+//                .filter(w -> !w.equals(worker))
+//                .filter(w -> !w.getUser().getName().isBlank()) //exclude connected but not logged yet
+//                .forEach(w -> {
+//                    ChannelWriter writer = w.getMessageWriter();
+//                    writer.send(SERVER_COMMAND_CHAT, message);
+//                    writer.send("", "");
+//                });
     }
 
     @Override
