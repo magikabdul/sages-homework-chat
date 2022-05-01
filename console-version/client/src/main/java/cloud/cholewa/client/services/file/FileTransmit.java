@@ -1,4 +1,4 @@
-package cloud.cholewa.server.engine.channel.file;
+package cloud.cholewa.client.services.file;
 
 import lombok.SneakyThrows;
 
@@ -17,7 +17,7 @@ public class FileTransmit {
         int bytes;
 
         try (DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-             FileOutputStream fileOutputStream = new FileOutputStream("server-" + fileName)) {
+             FileOutputStream fileOutputStream = new FileOutputStream(fileName)) {
 
             long size = dataInputStream.readLong();
 

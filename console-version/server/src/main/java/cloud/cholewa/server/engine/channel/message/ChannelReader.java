@@ -1,51 +1,39 @@
 package cloud.cholewa.server.engine.channel.message;
 
-import cloud.cholewa.server.builders.BasicServerFactory;
+import cloud.cholewa.message.Message;
 import cloud.cholewa.server.exceptions.ConnectionLostException;
 import lombok.SneakyThrows;
-import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.function.Consumer;
 
-import static cloud.cholewa.server.engine.channel.message.ServerMessageBuilder.SERVER_COMMAND_LOGIN;
-
 public class ChannelReader {
 
-    private final Logger log = new BasicServerFactory().createLogger(this.getClass());
+    private final Consumer<Message> processReadMessage;
 
-    private final ChannelWriter writer;
-    private final Consumer<String> processReadMessage;
+    private ObjectInputStream objectInputStream;
 
-    private BufferedReader bufferedReader;
-
-    public ChannelReader(Socket socket, ChannelWriter writer, Consumer<String> processReadMessage) {
-        this.writer = writer;
+    public ChannelReader(Socket messageSocket, Consumer<Message> processReadMessage) {
         this.processReadMessage = processReadMessage;
 
         try {
-            bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            objectInputStream = new ObjectInputStream(messageSocket.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    @SuppressWarnings("InfiniteLoopStatement")
     @SneakyThrows
     public void read() throws ConnectionLostException {
-        writer.send(SERVER_COMMAND_LOGIN, "");
-
-        String message;
-
         try {
-            while ((message = bufferedReader.readLine()) != null) {
-                processReadMessage.accept(message);
+            while (true) {
+                processReadMessage.accept((Message) objectInputStream.readObject());
             }
-        } catch (IOException e) {
-            bufferedReader.close();
-
+        } catch (Exception exception) {
             throw new ConnectionLostException("Client connection lost");
         }
     }

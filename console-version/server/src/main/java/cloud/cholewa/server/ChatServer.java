@@ -38,21 +38,24 @@ public class ChatServer {
         initServerChannelLogger();
 
         try {
-            ServerSocket serverSocket = new ServerSocket(port);
-            log.debug(String.format("Server started listening on port: %d", port));
-            listen(serverSocket);
+            ServerSocket massageServerSocket = new ServerSocket(port);
+            ServerSocket fileServerSocket = new ServerSocket(port + 1);
+            log.debug(String.format("Server started listening on ports: %d and %d", port, port + 1));
+            listen(massageServerSocket, fileServerSocket);
         } catch (IOException e) {
             log.error("Server running failed, error: " + e.getMessage());
         }
     }
 
-    private void listen(ServerSocket serverSocket) {
+    @SuppressWarnings("InfiniteLoopStatement")
+    private void listen(ServerSocket massageServerSocket, ServerSocket fileServerSocket) {
         try {
             while (true) {
-                Socket socket = serverSocket.accept();
+                Socket messageSocket = massageServerSocket.accept();
+                Socket fileSocket = fileServerSocket.accept();
                 log.debug("New client connected");
 
-                Worker worker = new Worker(socket, serverChannels);
+                Worker worker = new Worker(messageSocket, fileSocket, serverChannels);
                 executorService.execute(worker);
                 engine.addWorker(worker);
             }
@@ -69,6 +72,7 @@ public class ChatServer {
 
     class ChatChannelsLogger implements Runnable {
 
+        @SuppressWarnings({"InfiniteLoopStatement", "BusyWait"})
         @SneakyThrows
         public void run() {
             Map<String, Integer> channelStatus = new HashMap<>();

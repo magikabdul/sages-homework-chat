@@ -1,6 +1,8 @@
 package cloud.cholewa.server.engine.channel.storage;
 
+import cloud.cholewa.message.Message;
 import cloud.cholewa.server.builders.BasicServerFactory;
+import cloud.cholewa.server.helpers.DateTimeService;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -23,7 +25,7 @@ public class ChannelHistoryStorage {
 
     }
 
-    public void save(String channelName, String message) {
+    public void save(String channelName, Message message) {
         if (channelName.isBlank()) {
             channelName = "GLOBAL";
         }
@@ -34,7 +36,7 @@ public class ChannelHistoryStorage {
                 FileWriter fileWriter = new FileWriter(channelName + ".txt", true);
                 PrintWriter printWriter = new PrintWriter(fileWriter)
         ) {
-            printWriter.println(message);
+            printWriter.println(DateTimeService.getCurrentTime() + " [" + message.getUser() + "] - " + message.getBody());
         } catch (IOException e) {
             log.error(String.format("Problem with create/access to file %s", channelName));
         }
@@ -54,14 +56,11 @@ public class ChannelHistoryStorage {
                 FileReader fileReader = new FileReader(channelName + ".txt");
                 BufferedReader bufferedReader = new BufferedReader(fileReader)
         ) {
-            history.add("------------------- BEGIN -------------------");
 
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 history.add(line);
             }
-
-            history.add("------------------- END -------------------");
 
         } catch (IOException e) {
             log.error(String.format("Problem with read from file %s", channelName));

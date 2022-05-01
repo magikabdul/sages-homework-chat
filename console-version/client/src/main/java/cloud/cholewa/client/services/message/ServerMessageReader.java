@@ -1,92 +1,126 @@
 package cloud.cholewa.client.services.message;
 
 import cloud.cholewa.client.helpers.BasicClientFactory;
-import cloud.cholewa.client.services.User;
+import cloud.cholewa.client.services.ChatClient;
+import cloud.cholewa.client.services.file.FileTransmit;
+import cloud.cholewa.client.ui.Console;
+import cloud.cholewa.message.Message;
+import lombok.SneakyThrows;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
-
-import static cloud.cholewa.client.services.message.ServerMessageParser.KEY_CHANNEL_NAME;
-import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_CHANNEL;
-import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_CHAT;
-import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_END_SESSION;
-import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_FILE_TRANSFER;
-import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_HISTORY;
-import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_LOGIN;
-import static cloud.cholewa.client.services.message.ServerMessageParser.SERVER_COMMAND_OK;
+import java.io.EOFException;
+import java.io.ObjectInputStream;
 
 public class ServerMessageReader {
 
-    public final static String PROMPT = "#> ";
-
     private final Logger log = new BasicClientFactory().createLogger(this.getClass());
-    private final ServerMessageParser parser;
+    private final FileTransmit fileTransmit = new FileTransmit();
 
-    private final User user;
-    private BufferedReader reader;
+    private final ObjectInputStream objectInputStream;
+    private final ChatClient chatClient;
 
-    public ServerMessageReader(Socket socket, User user, ServerMessageParser parser) {
-        this.user = user;
-        this.parser = parser;
+
+    @SneakyThrows
+    public ServerMessageReader(ChatClient chatClient) {
+        this.chatClient = chatClient;
+        objectInputStream = new ObjectInputStream(chatClient.getMessageSocket().getInputStream());
+    }
+
+    @SuppressWarnings("InfiniteLoopStatement")
+    @SneakyThrows
+    public void read() {
+        log.setLevel(Level.OFF);
 
         try {
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        } catch (IOException e) {
-            e.printStackTrace();
+            while (true) {
+                Message message = (Message) objectInputStream.readObject();
+                chatClient.setLastServerMessage(message);
+                processInputMessage(message);
+            }
+        } catch (EOFException e) {
+            Console.writeSuccessMessage(true, "Bye. User correctly logged out\n", false);
         }
     }
 
-    public void read() {
-        log.setLevel(Level.OFF);
-        String message;
-
-        try {
-            while ((message = reader.readLine()) != null) {
-                if (message.startsWith(KEY_CHANNEL_NAME)) {
-                    parser.parseToMap(message);
-                    log.debug("SERVER: " + message);
-
-                    switch (parser.getServerCommandType()) {
-                        case SERVER_COMMAND_OK:
-                            System.out.print("\n" + user.getChannel() + "/" + user.getName() + PROMPT);
-                            break;
-                        case SERVER_COMMAND_LOGIN:
-                            System.out.print("\n" + "Please enter your name " + PROMPT);
-                            break;
-                        case SERVER_COMMAND_CHANNEL:
-                            System.out.println();
-                            System.out.println(parser.getMessageBody());
-                            break;
-                        case SERVER_COMMAND_CHAT:
-                            System.out.println("");
-                            System.out.println(parser.getMessageBody());
-                            break;
-                        case SERVER_COMMAND_HISTORY:
-                            String messageBody = parser.getMessageBody();
-                            if (messageBody.contains("- START -")) {
-                                System.out.println();
-                            }
-                            System.out.println(messageBody);
-                            break;
-                        case SERVER_COMMAND_FILE_TRANSFER:
-                            System.out.println();
-                            System.out.println("File transfer ... " + parser.getMessageBody());
-                            break;
-                        case SERVER_COMMAND_END_SESSION:
-                            System.out.println(parser.getMessageBody());
-                            reader.close();
-                            break;
-                        default:
-                            log.error("Unrecognized server command");
-                    }
-                }
-            }
-        } catch (IOException e) {
-            log.error("Reading line error form BufferedReader: " + e.getMessage());
+    public void processInputMessage(Message message) {
+        switch (message.getType()) {
+            case REQUEST_FOR_LOGIN:
+                requestForLogin(message);
+                break;
+            case SERVER_CHAT:
+                processServerBroadcast(message);
+                break;
+            case RESPONSE_CHANNEL_CHANGE:
+                updateChannelData(message);
+                break;
+            case RESPONSE_CHANNEL_CHANGE_ERROR:
+                handleChannelChangeError(message);
+                break;
+            case HISTORY_BEGIN:
+                Console.writeHistoryHeader(message.getBody());
+                break;
+            case HISTORY_POSITION:
+                Console.writeHistoryPosition(message.getBody());
+                break;
+            case HISTORY_END:
+                Console.writeHistoryFooter(message.getBody());
+                showPrompt();
+                break;
+            case FILE_TRANSFER_ERROR:
+                handleFileTransferError(message);
+                break;
+            case FILE_TRANSFER_REQUEST:
+                handleFileSend(message);
+                break;
+            case FILE_RECEIVE_REQUEST:
+                handleFileReceive(message);
+                break;
+            default:
+                showPrompt();
         }
+    }
+
+    @SneakyThrows
+    private void handleFileReceive(Message message) {
+        Console.writeInfoMessage(true, "Receiving file type \\r and hit ENTER", false);
+        chatClient.setLastServerMessage(message);
+    }
+
+    private void handleFileSend(Message message) {
+        Console.writeInfoMessage(true, "File transfer started", false);
+        String fileName = message.getBody().split("/")[0].split(":")[1];
+
+        fileTransmit.send(chatClient.getFileSocket(), fileName);
+        showPrompt();
+    }
+
+    private void handleFileTransferError(Message message) {
+        Console.writeErrorMessage(true, message.getBody(), false);
+        showPrompt();
+    }
+
+    private void handleChannelChangeError(Message message) {
+        Console.writeErrorMessage(true, message.getBody(), false);
+        showPrompt();
+    }
+
+
+    private void updateChannelData(Message message) {
+        chatClient.getUser().setChannel(message.getChannel());
+        showPrompt();
+    }
+
+    private void processServerBroadcast(Message message) {
+        Console.writeServerBroadcast(message.getUser(), message.getChannel(), message.getBody());
+        showPrompt();
+    }
+
+    private void showPrompt() {
+        Console.writePromptMessage(true, chatClient.getUser());
+    }
+
+    public void requestForLogin(Message message) {
+        Console.writeInfoMessage(true, message.getBody(), true);
     }
 }
