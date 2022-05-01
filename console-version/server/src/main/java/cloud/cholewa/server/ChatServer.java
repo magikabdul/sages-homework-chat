@@ -72,7 +72,7 @@ public class ChatServer {
 
     class ChatChannelsLogger implements Runnable {
 
-        @SuppressWarnings("InfiniteLoopStatement")
+        @SuppressWarnings({"InfiniteLoopStatement", "BusyWait"})
         @SneakyThrows
         public void run() {
             Map<String, Integer> channelStatus = new HashMap<>();

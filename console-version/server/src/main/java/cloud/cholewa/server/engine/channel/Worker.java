@@ -5,7 +5,6 @@ import cloud.cholewa.server.builders.BasicServerFactory;
 import cloud.cholewa.server.engine.channel.file.FileTransmit;
 import cloud.cholewa.server.engine.channel.message.ChannelReader;
 import cloud.cholewa.server.engine.channel.message.ChannelWriter;
-import cloud.cholewa.server.engine.channel.message.ClientMessageParser;
 import cloud.cholewa.server.engine.channel.storage.ChannelHistoryStorage;
 import cloud.cholewa.server.exceptions.ConnectionLostException;
 import lombok.Getter;
@@ -15,7 +14,6 @@ import org.apache.log4j.Logger;
 import java.net.Socket;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static cloud.cholewa.message.MessageType.HISTORY_BEGIN;
 import static cloud.cholewa.message.MessageType.HISTORY_END;
@@ -63,7 +61,7 @@ public class Worker implements Runnable {
                 .build());
 
         try {
-            new ChannelReader(messageSocket, fileSocket, messageWriter, this::processIncomingMessage).read();
+            new ChannelReader(messageSocket, fileSocket, this::processIncomingMessage).read();
         } catch (ConnectionLostException e) {
             removeWorkerFromServerChannels();
         }

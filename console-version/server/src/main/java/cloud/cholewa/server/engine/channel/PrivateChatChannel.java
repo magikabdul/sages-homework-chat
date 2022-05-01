@@ -1,8 +1,6 @@
 package cloud.cholewa.server.engine.channel;
 
 import cloud.cholewa.message.Message;
-import cloud.cholewa.server.builders.BasicServerFactory;
-import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +11,6 @@ import static cloud.cholewa.message.MessageType.SERVER_CHAT;
 
 public class PrivateChatChannel implements ChatChannel {
 
-    private final Logger log = new BasicServerFactory().createLogger(this.getClass());
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private final String name;
@@ -44,14 +41,12 @@ public class PrivateChatChannel implements ChatChannel {
         workers.stream()
                 .filter(w -> !w.equals(worker))
                 .filter(w -> !w.getUser().getName().isBlank()) //exclude connected but not logged yet
-                .forEach(w -> {
-                    w.getMessageWriter().send(Message.builder()
-                            .user(worker.getUser().getName())
-                            .channel(worker.getUser().getChannel())
-                            .type(SERVER_CHAT)
-                            .body(message)
-                            .build());
-                });
+                .forEach(w -> w.getMessageWriter().send(Message.builder()
+                        .user(worker.getUser().getName())
+                        .channel(worker.getUser().getChannel())
+                        .type(SERVER_CHAT)
+                        .body(message)
+                        .build()));
         lock.readLock().unlock();
     }
 

@@ -1,10 +1,8 @@
 package cloud.cholewa.server.engine.channel.message;
 
 import cloud.cholewa.message.Message;
-import cloud.cholewa.server.builders.BasicServerFactory;
 import cloud.cholewa.server.exceptions.ConnectionLostException;
 import lombok.SneakyThrows;
-import org.apache.log4j.Logger;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -14,16 +12,12 @@ import java.util.function.Consumer;
 
 public class ChannelReader {
 
-    private final Logger log = new BasicServerFactory().createLogger(this.getClass());
-
-    private final ChannelWriter writer;
     private final Consumer<Message> processReadMessage;
 
     private ObjectInputStream objectInputStream;
     private DataInputStream dataInputStream;
 
-    public ChannelReader(Socket messageSocket, Socket fileSocket, ChannelWriter writer, Consumer<Message> processReadMessage) {
-        this.writer = writer;
+    public ChannelReader(Socket messageSocket, Socket fileSocket, Consumer<Message> processReadMessage) {
         this.processReadMessage = processReadMessage;
 
         try {
