@@ -55,7 +55,7 @@ public class Worker implements Runnable {
     public void run() {
         log.debug("Running new chat worker thread");
 
-        messageWriter = new ChannelWriter(messageSocket, user);
+        messageWriter = new ChannelWriter(messageSocket);
         messageWriter.send(Message.builder()
                 .user(user.getName())
                 .channel(user.getChannel())
@@ -64,7 +64,7 @@ public class Worker implements Runnable {
                 .build());
 
         try {
-            new ChannelReader(messageSocket, fileSocket, this::processIncomingMessage).read();
+            new ChannelReader(messageSocket, this::processIncomingMessage).read();
         } catch (ConnectionLostException e) {
             removeWorkerFromServerChannels();
         }

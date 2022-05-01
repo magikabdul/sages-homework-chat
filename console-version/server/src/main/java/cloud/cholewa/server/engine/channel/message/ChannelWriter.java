@@ -15,9 +15,8 @@ public class ChannelWriter {
     private final Logger log = new BasicServerFactory().createLogger(this.getClass());
 
     private ObjectOutputStream objectOutputStream;
-    private DataOutputStream dataOutputStream;
 
-    public ChannelWriter(Socket messageSocket, User user) {
+    public ChannelWriter(Socket messageSocket) {
 
         try {
             objectOutputStream = new ObjectOutputStream(messageSocket.getOutputStream());

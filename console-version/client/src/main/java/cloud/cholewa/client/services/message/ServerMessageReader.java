@@ -11,9 +11,6 @@ import org.apache.log4j.Logger;
 
 import java.io.EOFException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-
-import static cloud.cholewa.message.MessageType.FILE_RECEIVING_FROM_SERVER_READY;
 
 public class ServerMessageReader {
 
@@ -88,18 +85,6 @@ public class ServerMessageReader {
     private void handleFileReceive(Message message) {
         Console.writeInfoMessage(true, "Receiving file type \\r and hit ENTER", false);
         chatClient.setLastServerMessage(message);
-        //String fileName = message.getBody().split("/")[0].split(":")[1];
-
-//        ObjectOutputStream objectOutputStream = new ObjectOutputStream(chatClient.getMessageSocket().getOutputStream());
-//        objectOutputStream.writeObject(Message.builder()
-//                .type(FILE_RECEIVING_FROM_SERVER_READY)
-//                .body(message.getBody())
-//                .build());
-//        System.out.println("fff");
-//        fileTransmit.receive(chatClient.getFileSocket(), chatClient.getUser().getName() + "-" + fileName);
-//
-//        Console.writeInfoMessage(true, "Finished file receiving", false);
-//        showPrompt();
     }
 
     private void handleFileSend(Message message) {

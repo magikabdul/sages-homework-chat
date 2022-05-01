@@ -15,9 +15,8 @@ public class ChannelReader {
     private final Consumer<Message> processReadMessage;
 
     private ObjectInputStream objectInputStream;
-    private DataInputStream dataInputStream;
 
-    public ChannelReader(Socket messageSocket, Socket fileSocket, Consumer<Message> processReadMessage) {
+    public ChannelReader(Socket messageSocket, Consumer<Message> processReadMessage) {
         this.processReadMessage = processReadMessage;
 
         try {
