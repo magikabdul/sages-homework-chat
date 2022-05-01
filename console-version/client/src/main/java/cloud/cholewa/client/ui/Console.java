@@ -23,7 +23,7 @@ public class Console {
     public static void writeInfoMessage(boolean inNewLine, String body, boolean withPrompt) {
         StringBuilder sb = new StringBuilder();
         sb.append(inNewLine ? "\n" : "");
-        sb.append(ConsoleColor.GREEN)
+        sb.append(ConsoleColor.GREEN_BACKGROUND)
                 .append(body)
                 .append(ConsoleColor.RESET);
         sb.append(withPrompt ? PROMPT : "");
@@ -33,7 +33,7 @@ public class Console {
     public static void writeWarningMessage(boolean inNewLine, String body, boolean withPrompt) {
         StringBuilder sb = new StringBuilder();
         sb.append(inNewLine ? "\n" : "");
-        sb.append(ConsoleColor.YELLOW_BOLD)
+        sb.append(ConsoleColor.YELLOW_BACKGROUND)
                 .append(body)
                 .append(ConsoleColor.RESET);
         sb.append(withPrompt ? PROMPT : "");
@@ -59,5 +59,20 @@ public class Console {
         sb.append(ConsoleColor.RESET);
         sb.append(PROMPT);
         System.out.print(sb);
+    }
+
+    public static void writeServerBroadcast(String user, String chanel, String body) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n")
+                .append(ConsoleColor.MAGENTA_BACKGROUND)
+                .append(chanel.toUpperCase())
+                .append(chanel.length() > 0 ? " / " : "")
+                .append(ConsoleColor.GREEN_BACKGROUND)
+                .append(user)
+                .append(ConsoleColor.RESET)
+                .append(" - ")
+                .append(body)
+                .append("\n");
+        System.out.println(sb);
     }
 }

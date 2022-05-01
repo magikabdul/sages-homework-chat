@@ -71,9 +71,29 @@ public class Worker implements Runnable {
             case REQUEST_END_SESSION:
                 executeEndSession();
                 break;
+            case CLIENT_CHAT:
+                broadcastClientMessage(message);
+                break;
             default:
                 log.error("Unknown client message type");
         }
+    }
+
+    private void broadcastClientMessage(Message message) {
+        user.setName(message.getUser());
+        user.setChannel(message.getChannel());
+
+        serverChannels.stream()
+                .filter(chatChannel -> chatChannel.getAllWorkers().contains(this))
+                .findAny().orElseThrow()
+                .broadcast(this, message.getBody());
+
+        messageWriter.send(Message.builder()
+                .user(user.getName())
+                .channel(user.getChannel())
+                .type(SERVER_OK)
+                .body("")
+                .build());
     }
 
     @SneakyThrows

@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import static cloud.cholewa.message.MessageType.CLIENT_CHAT;
 import static cloud.cholewa.message.MessageType.REQUEST_END_SESSION;
 import static cloud.cholewa.message.MessageType.RESPONSE_FOR_LOGIN;
 
@@ -60,7 +61,7 @@ public class ClientMessageWriter {
                     break;
                 default:
                     log.error("Unsupported control command");
-                    handleShowPrompt();
+//                    sendChatMessage();
             }
         } else {
             Console.writeWarningMessage(true, "Invalid usage of control character \\", true);
@@ -73,7 +74,7 @@ public class ClientMessageWriter {
                 handleLoginRequest(consoleMessage);
                 break;
             default:
-                handleShowPrompt();
+                sendChatMessage(consoleMessage);
         }
     }
 
@@ -86,8 +87,16 @@ public class ClientMessageWriter {
                 .build());
     }
 
-    private void handleShowPrompt() {
-        Console.writePromptMessage(true, chatClient.getUser());
+    @SneakyThrows
+    private void sendChatMessage(String message) {
+        if (message.length() > 0) {
+            objectOutputStream.writeObject(Message.builder()
+                    .user(chatClient.getUser().getName())
+                    .channel(chatClient.getUser().getChannel())
+                    .body(message)
+                    .type(CLIENT_CHAT)
+                    .build());
+        }
     }
 
     @SneakyThrows

@@ -46,9 +46,15 @@ public class ServerMessageReader {
             case REQUEST_FOR_LOGIN:
                 requestForLogin(message);
                 break;
+            case SERVER_CHAT:
+                processServerBroadcast(message);
             default:
                 showPrompt();
         }
+    }
+
+    private void processServerBroadcast(Message message) {
+        Console.writeServerBroadcast(message.getUser(), message.getChannel(), message.getBody());
     }
 
     private void showPrompt() {
