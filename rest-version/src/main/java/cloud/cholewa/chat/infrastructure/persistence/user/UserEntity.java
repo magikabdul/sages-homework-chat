@@ -12,9 +12,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import java.util.UUID;
 
 @NamedQuery(name = UserEntity.FIND_BY_NICK, query = "SELECT u FROM UserEntity u WHERE u.nick LIKE :nick")
+@NamedQuery(name = UserEntity.FIND_BY_TOKEN, query = "SELECT u FROM UserEntity u WHERE u.token LIKE :token")
 @Entity
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -22,6 +22,7 @@ import java.util.UUID;
 public class UserEntity {
 
     public static final String FIND_BY_NICK = "userFindByNick";
+    public static final String FIND_BY_TOKEN = "userFindByToken";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +35,7 @@ public class UserEntity {
     private String password;
 
     @Setter
-    private UUID token;
+    private String token;
 
     public UserEntity(String nick, String password) {
         this.nick = nick;

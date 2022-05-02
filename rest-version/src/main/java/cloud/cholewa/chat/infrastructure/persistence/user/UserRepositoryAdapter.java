@@ -25,6 +25,12 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     }
 
     @Override
+    public Optional<User> findByToken(String token) {
+        var optionalUser = userRepository.findByToken(token);
+        return optionalUser.map(userMapper::toDomain);
+    }
+
+    @Override
     public User update(User user) {
         return userMapper.toDomain(userRepository.update(userMapper.toEntity(user)));
     }

@@ -1,6 +1,6 @@
 package cloud.cholewa.chat.domain.user.adapter;
 
-import cloud.cholewa.chat.domain.user.exceptions.UserException;
+import cloud.cholewa.chat.domain.user.exceptions.ChannelException;
 import cloud.cholewa.chat.domain.user.model.User;
 import cloud.cholewa.chat.domain.user.port.in.UserServicePort;
 import cloud.cholewa.chat.domain.user.port.out.UserRepositoryPort;
@@ -27,7 +27,7 @@ public class UserServiceAdapter implements UserServicePort {
         if (nickNotExist(user.getNick())) {
             return userRepository.save(user);
         } else {
-            throw new UserException(USER_EXISTS);
+            throw new ChannelException(USER_EXISTS);
         }
     }
 
@@ -40,13 +40,13 @@ public class UserServiceAdapter implements UserServicePort {
             authorizedUser = optionalUser.get();
 
             if (areCredentialsNotCorrect(user, authorizedUser)) {
-                throw new UserException(USER_INVALID_CREDENTIALS);
+                throw new ChannelException(USER_INVALID_CREDENTIALS);
             }
-            authorizedUser.setToken(UUID.randomUUID());
+            authorizedUser.setToken(UUID.randomUUID().toString());
             return userRepository.update(authorizedUser);
 
         } else {
-            throw new UserException(USER_NOT_FOUND);
+            throw new ChannelException(USER_NOT_FOUND);
         }
     }
 
