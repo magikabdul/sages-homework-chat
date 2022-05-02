@@ -1,5 +1,6 @@
 package cloud.cholewa.chat.domain.user.adapter;
 
+import cloud.cholewa.chat.domain.chat.ChatService;
 import cloud.cholewa.chat.domain.user.exceptions.ChannelException;
 import cloud.cholewa.chat.domain.user.model.User;
 import cloud.cholewa.chat.domain.user.port.in.UserServicePort;
@@ -20,6 +21,7 @@ import static cloud.cholewa.chat.domain.user.exceptions.UserExceptionDictionary.
 public class UserServiceAdapter implements UserServicePort {
 
     private final UserRepositoryPort userRepository;
+    private final ChatService chatService;
 
     @Override
     public User register(User user) {
@@ -42,7 +44,14 @@ public class UserServiceAdapter implements UserServicePort {
             if (areCredentialsNotCorrect(user, authorizedUser)) {
                 throw new ChannelException(USER_INVALID_CREDENTIALS);
             }
+
             authorizedUser.setToken(UUID.randomUUID().toString());
+
+            chatService.getChannels().stream()
+                    .filter(channel -> channel.getName().equals("general"))
+                    .findFirst().orElseThrow()
+                    .addActiveUser(authorizedUser.getNick());
+
             return userRepository.update(authorizedUser);
 
         } else {

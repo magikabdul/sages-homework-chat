@@ -2,13 +2,21 @@ package cloud.cholewa.chat.domain.channel.model;
 
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Channel {
 
     private Long id;
     private String name;
-    private List<String> activeUsers = new ArrayList<>();
+    private Set<String> activeUsers = new HashSet<>();
+
+    public void addActiveUser(String name) {
+        activeUsers.add(name);
+    }
+
+    public void removeActiveUser(String name) {
+        activeUsers.remove(name);
+    }
 }
