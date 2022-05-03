@@ -1,11 +1,11 @@
 package cloud.cholewa.rest_client.domain;
 
+import cloud.cholewa.rest_client.domain.dto.ErrorDto;
+import cloud.cholewa.rest_client.domain.dto.TokenDto;
 import cloud.cholewa.rest_client.domain.dto.UserDto;
 import cloud.cholewa.rest_client.domain.ui.Console;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.core.MediaType;
 import lombok.SneakyThrows;
-import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
+import org.apache.http.HttpStatus;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,7 +13,11 @@ import java.util.concurrent.Executors;
 public class ClientService {
 
     private final ExecutorService es = Executors.newSingleThreadExecutor();
-    private final String SERVER_URL = "http://localhost:8080/chat/";
+    private final ApiGateway apiGateway = new ApiGateway();
+
+    private String userName;
+    private String token;
+    private String channel;
 
     @SneakyThrows
     public String getConsole() {
@@ -26,45 +30,67 @@ public class ClientService {
         while (!done) {
             String command = getConsole();
 
-            if (command.equals("1")) {
-                executeRegister();
-                done = executeLogin();
-            } else if (command.equals("2")) {
-                done = executeLogin();
-            } else {
-                Console.errorMessage("Invalid option");
+            switch (command) {
+                case "1" -> done = executeLogin();
+                case "2" -> {
+                    executeRegister();
+                    done = executeLogin();
+                }
+                case "3" -> done = true;
+                default -> Console.errorMessage("Invalid option", true);
             }
         }
     }
 
     private void executeRegister() {
-        Console.infoMessage("NICK: ", false);
-        String nick = getConsole();
-        Console.infoMessage("PASSWORD: ", false);
-        String password = getConsole();
+        boolean isSuccess = false;
 
+        do {
+            Console.infoMessage("NICK: ", false);
+            String nick = getConsole();
+            Console.infoMessage("PASSWORD: ", false);
+            String password = getConsole();
 
-        var restClient = new ResteasyClientBuilderImpl().build();
+            var response = apiGateway.doResister(UserDto.builder()
+                    .nick(nick)
+                    .password(password)
+                    .build());
+            if (response.getStatus() == HttpStatus.SC_CREATED) {
+                isSuccess = true;
+            } else {
+                Console.errorMessage(response.readEntity(ErrorDto.class).getDescription(), false);
+            }
+        } while (!isSuccess);
 
-        var response =  restClient.target(SERVER_URL + "users/register")
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
-                .post(Entity.entity(
-                        UserDto.builder()
-                                .nick(nick)
-                                .password(password)
-                                .build(),
-                        MediaType.APPLICATION_JSON));
-
-        Console.infoMessage("Status: " + response.getStatus(), true);
         Console.successMessage("SUCCESS - please login", false);
     }
 
     private boolean executeLogin() {
-        Console.infoMessage("NICK: ", false);
-        String nick = getConsole();
-        Console.infoMessage("PASSWORD: ", false);
-        String password = getConsole();
+        boolean isSuccess = false;
+
+        do {
+            Console.infoMessage("NICK: ", false);
+            String nick = getConsole();
+            Console.infoMessage("PASSWORD: ", false);
+            String password = getConsole();
+
+            var response = apiGateway.doLogin(UserDto.builder()
+                    .nick(nick)
+                    .password(password)
+                    .build());
+            if (response.getStatus() == HttpStatus.SC_OK) {
+                token = response.readEntity(TokenDto.class).getToken();
+                userName = nick;
+                channel = "general";
+                isSuccess = true;
+            } else {
+                Console.errorMessage(response.readEntity(ErrorDto.class).getDescription(), false);
+            }
+
+        } while (!isSuccess);
+
+        Console.successMessage("SUCCESSFULLY LOGGED IN", false);
+        Console.advancedPrompt(channel, userName);
         return true;
     }
 

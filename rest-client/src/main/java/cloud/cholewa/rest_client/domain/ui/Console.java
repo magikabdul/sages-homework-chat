@@ -23,8 +23,9 @@ public class Console {
                 .append(ConsoleColor.WHITE_BOLD)
                 .append("""
                         Select below option
-                        1. Register user
-                        2. Login user
+                        1. Login
+                        2. Register
+                        3. Exit
                         """);
         System.out.print(sb);
         showPrompt();
@@ -43,14 +44,17 @@ public class Console {
         }
     }
 
-    public static void errorMessage(String message) {
+    public static void errorMessage(String message, boolean showPrompt) {
         StringBuilder sb = new StringBuilder();
         sb.append(ConsoleColor.RED_BACKGROUND)
                 .append(message)
                 .append("\n")
                 .append(ConsoleColor.RESET);
         System.out.print(sb);
-        showPrompt();
+
+        if (showPrompt) {
+            showPrompt();
+        }
     }
 
     public static void successMessage(String message, boolean showPrompt) {
@@ -64,6 +68,20 @@ public class Console {
         if (showPrompt) {
             showPrompt();
         }
+    }
+
+    public static void advancedPrompt(String channel, String userName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColor.BLACK_BOLD)
+                .append(ConsoleColor.YELLOW_BACKGROUND)
+                .append(" ")
+                .append(channel.toUpperCase())
+                .append(" / ")
+                .append(userName)
+                .append(" #>")
+                .append(ConsoleColor.RESET)
+                .append(" ");
+        System.out.print(sb);
     }
 
     private static void showPrompt() {
