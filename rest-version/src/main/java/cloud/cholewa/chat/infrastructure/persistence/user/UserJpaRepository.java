@@ -24,6 +24,18 @@ public class UserJpaRepository {
         }
     }
 
+    public Optional<UserEntity> findByToken(String token) {
+        try {
+            return Optional.of(
+                    entityManager.createNamedQuery(UserEntity.FIND_BY_TOKEN, UserEntity.class)
+                            .setParameter("token", token)
+                            .getSingleResult()
+            );
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
     public UserEntity save(UserEntity userEntity) {
         entityManager.persist(userEntity);
         return findByNick(userEntity.getNick()).orElseThrow();

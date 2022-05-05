@@ -10,5 +10,7 @@ public interface UserRepositoryPort {
 
     Optional<User> findByNick(String nick);
 
+    Optional<User> findByToken(String token);
+
     User update(User user);
 }

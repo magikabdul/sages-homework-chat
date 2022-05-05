@@ -12,6 +12,7 @@
     <modules>
         <module>console-version</module>
         <module>rest-version</module>
+        <module>rest-client</module>
     </modules>
 
     <properties>
