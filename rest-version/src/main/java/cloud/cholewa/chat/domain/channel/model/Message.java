@@ -15,5 +15,6 @@ public class Message {
     private LocalTime createdAtTime;
     private String body;
     private User author;
+    private Channel channel;
 
 }
