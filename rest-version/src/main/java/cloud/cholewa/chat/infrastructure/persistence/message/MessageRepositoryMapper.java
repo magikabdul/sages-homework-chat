@@ -1,5 +1,6 @@
 package cloud.cholewa.chat.infrastructure.persistence.message;
 
+import cloud.cholewa.chat.domain.channel.model.HistoryMessage;
 import cloud.cholewa.chat.domain.channel.model.Message;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,4 +16,6 @@ public interface MessageRepositoryMapper {
     @Mapping(target = "channel", ignore = true)
     @Mapping(target = "author", ignore = true)
     Message toDomain(MessageEntity messageEntity);
+
+    HistoryMessage toDomain(HistoryMessageEntity historyMessageEntity);
 }
