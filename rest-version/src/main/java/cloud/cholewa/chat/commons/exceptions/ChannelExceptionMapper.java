@@ -1,6 +1,6 @@
 package cloud.cholewa.chat.commons.exceptions;
 
-import cloud.cholewa.chat.domain.user.exceptions.ChannelException;
+import cloud.cholewa.chat.domain.channel.exceptions.ChannelException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;

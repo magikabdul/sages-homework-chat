@@ -12,6 +12,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -39,9 +40,12 @@ public class ChannelController {
         return Response.created(getLocation(channel.getId())).build();
     }
 
-    @GET
-    public Response changeChannel() {
-        return null;
+    @GET()
+    @Path("change/{newChannel}")
+    public Response changeChannel(@PathParam("newChannel") String newChannel,
+                                  @HeaderParam("token") String token) {
+        channelServicePort.changeChannel(newChannel, token);
+        return Response.accepted().build();
     }
 
     @GET

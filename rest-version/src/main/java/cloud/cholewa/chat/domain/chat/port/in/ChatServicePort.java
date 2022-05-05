@@ -7,4 +7,8 @@ import java.util.Set;
 public interface ChatServicePort {
 
     Set<Channel> getFullInfo();
+
+    void addChannel(Channel channel);
+
+    Set<Channel> getAllServerChannels();
 }
