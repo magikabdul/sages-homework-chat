@@ -48,12 +48,19 @@ public class ChannelServiceAdapter implements ChannelServicePort {
     public Message publishMessage(String message, String token) {
         verifyPermission(token);
 
-        User user = userRepository.findByToken(token).orElseThrow();
+        var user = userRepository.findByToken(token).orElseThrow();
+
+        var channel = chatService.getAllServerChannels().stream()
+                .filter(ch -> ch.getActiveUsers().contains(user.getNick()))
+                .findFirst()
+                .orElseThrow();
+
         var newMessage = Message.builder()
                 .createdAtDate(LocalDate.now())
                 .createdAtTime(LocalTime.now())
                 .body(message)
                 .author(user)
+                .channel(channel)
                 .build();
 
         return messageRepository.save(newMessage);
