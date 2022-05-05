@@ -62,8 +62,9 @@ public class ChannelController {
 
     @GET
     @Path("/history")
-    public Response getChannelHistory() {
-        return null;
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response getChannelHistory(@HeaderParam("token") String token) {
+        return Response.ok(channelServicePort.getHistory(token)).build();
     }
 
     @POST

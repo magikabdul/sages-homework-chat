@@ -1,6 +1,7 @@
 package cloud.cholewa.chat.domain.channel.port.in;
 
 import cloud.cholewa.chat.domain.channel.model.Channel;
+import cloud.cholewa.chat.domain.channel.model.HistoryMessage;
 import cloud.cholewa.chat.domain.channel.model.Message;
 import cloud.cholewa.chat.domain.user.model.User;
 
@@ -18,7 +19,7 @@ public interface ChannelServicePort {
 
     void removeMember(User user);
 
-    List<Message> getHistory();
+    List<HistoryMessage> getHistory(String token);
 
     User getMemberByNick();
 

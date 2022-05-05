@@ -2,6 +2,7 @@ package cloud.cholewa.chat.domain.channel.adapter;
 
 import cloud.cholewa.chat.domain.channel.exceptions.ChannelException;
 import cloud.cholewa.chat.domain.channel.model.Channel;
+import cloud.cholewa.chat.domain.channel.model.HistoryMessage;
 import cloud.cholewa.chat.domain.channel.model.Message;
 import cloud.cholewa.chat.domain.channel.port.in.ChannelServicePort;
 import cloud.cholewa.chat.domain.channel.port.out.ChannelRepositoryPort;
@@ -68,8 +69,8 @@ public class ChannelServiceAdapter implements ChannelServicePort {
 
     @Override
     public void changeChannel(String name, String token) {
-        User user = verifyPermission(token);
-        Channel channel = getChannelIfExists(name);
+        var user = verifyPermission(token);
+        var channel = getChannelIfExists(name);
 
         enableChanelOnServer(channel);
         moveUserToNewChannel(user, channel);
@@ -86,8 +87,15 @@ public class ChannelServiceAdapter implements ChannelServicePort {
     }
 
     @Override
-    public List<Message> getHistory() {
-        return null;
+    public List<HistoryMessage> getHistory(String token) {
+        var user = verifyPermission(token);
+
+        var channel = chatService.getAllServerChannels().stream()
+                .filter(ch -> ch.getActiveUsers().contains(user.getNick()))
+                .findFirst()
+                .orElseThrow();
+
+        return messageRepository.getChannelHistory(channel.getName());
     }
 
     @Override

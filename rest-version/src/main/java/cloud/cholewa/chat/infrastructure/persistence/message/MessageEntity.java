@@ -26,6 +26,7 @@ import java.time.LocalTime;
 public class MessageEntity {
 
     public final static String FIND_BY_ID = "findById";
+    public final static String GET_HISTORY_BY_CHANNEL = "getHistoryByChannel";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
