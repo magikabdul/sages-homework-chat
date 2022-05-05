@@ -12,7 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
-@NamedQuery(name = ChannelEntity.FIND_BY_NAME, query = "SELECT c FROM ChannelEntity c WHERE c.name LIKE :name")
+@NamedQuery(name = ChannelEntity.FIND_BY_NAME,
+        query = "SELECT c FROM ChannelEntity c WHERE c.name LIKE :name")
 @Entity
 @Table(name = "channels")
 @NoArgsConstructor

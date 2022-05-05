@@ -1,9 +1,10 @@
 package cloud.cholewa.chat.domain.channel.adapter;
 
 import cloud.cholewa.chat.domain.channel.model.Channel;
+import cloud.cholewa.chat.domain.channel.model.Message;
 import cloud.cholewa.chat.domain.channel.port.in.ChannelServicePort;
 import cloud.cholewa.chat.domain.channel.port.out.ChannelRepositoryPort;
-import cloud.cholewa.chat.domain.message.model.Message;
+import cloud.cholewa.chat.domain.channel.port.out.MessageRepositoryPort;
 import cloud.cholewa.chat.domain.user.exceptions.ChannelException;
 import cloud.cholewa.chat.domain.user.model.User;
 import cloud.cholewa.chat.domain.user.port.out.UserRepositoryPort;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static cloud.cholewa.chat.domain.channel.exceptions.ChannelExceptionDictionary.CHANNEL_EXIST;
@@ -22,6 +25,7 @@ public class ChannelServiceAdapter implements ChannelServicePort {
 
     private final UserRepositoryPort userRepository;
     private final ChannelRepositoryPort channelRepository;
+    private final MessageRepositoryPort messageRepository;
 
     @Override
     public Channel createChannel(Channel channel, String token) {
@@ -34,6 +38,20 @@ public class ChannelServiceAdapter implements ChannelServicePort {
         return channelRepository.save(channel);
     }
 
+    @Override
+    public Message publishMessage(String message, String token) {
+        verifyPermission(token);
+
+        User user = userRepository.findByToken(token).orElseThrow();
+        var newMessage = Message.builder()
+                .createdAtDate(LocalDate.now())
+                .createdAtTime(LocalTime.now())
+                .body(message)
+                .author(user)
+                .build();
+
+        return messageRepository.save(newMessage);
+    }
 
     @Override
     public boolean changeChannel(String name) {

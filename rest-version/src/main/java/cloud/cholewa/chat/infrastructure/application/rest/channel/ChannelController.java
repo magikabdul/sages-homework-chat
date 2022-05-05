@@ -4,6 +4,7 @@ import cloud.cholewa.chat.domain.channel.model.Channel;
 import cloud.cholewa.chat.domain.channel.port.in.ChannelServicePort;
 import cloud.cholewa.chat.infrastructure.application.rest.channel.dto.ChannelCreateRequest;
 import cloud.cholewa.chat.infrastructure.application.rest.channel.dto.ChannelRestMapper;
+import cloud.cholewa.chat.infrastructure.application.rest.channel.dto.MessagePublishRequest;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -11,7 +12,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
@@ -61,8 +64,11 @@ public class ChannelController {
 
     @POST
     @Path("/messages")
-    public Response postMessage() {
-        return null;
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response publishMessage(@Valid MessagePublishRequest messagePublishRequest,
+                                   @HeaderParam("token") String token) {
+
+        return Response.ok(channelServicePort.publishMessage(messagePublishRequest.getBody(), token)).build();
     }
 
 
