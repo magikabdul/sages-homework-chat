@@ -1,11 +1,13 @@
 package cloud.cholewa.chat.domain.channel.adapter;
 
+import cloud.cholewa.chat.domain.channel.exceptions.ChannelException;
 import cloud.cholewa.chat.domain.channel.model.Channel;
 import cloud.cholewa.chat.domain.channel.model.Message;
 import cloud.cholewa.chat.domain.channel.port.in.ChannelServicePort;
 import cloud.cholewa.chat.domain.channel.port.out.ChannelRepositoryPort;
 import cloud.cholewa.chat.domain.channel.port.out.MessageRepositoryPort;
-import cloud.cholewa.chat.domain.user.exceptions.ChannelException;
+import cloud.cholewa.chat.domain.chat.port.in.ChatServicePort;
+import cloud.cholewa.chat.domain.user.exceptions.UserException;
 import cloud.cholewa.chat.domain.user.model.User;
 import cloud.cholewa.chat.domain.user.port.out.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +17,11 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static cloud.cholewa.chat.domain.channel.exceptions.ChannelExceptionDictionary.CHANNEL_EXIST;
+import static cloud.cholewa.chat.domain.channel.exceptions.ChannelExceptionDictionary.CHANNEL_NOT_FOUND;
 import static cloud.cholewa.chat.domain.user.exceptions.UserExceptionDictionary.USER_INVALID_TOKEN;
 
 @Transactional
@@ -26,6 +31,7 @@ public class ChannelServiceAdapter implements ChannelServicePort {
     private final UserRepositoryPort userRepository;
     private final ChannelRepositoryPort channelRepository;
     private final MessageRepositoryPort messageRepository;
+    private final ChatServicePort chatService;
 
     @Override
     public Channel createChannel(Channel channel, String token) {
@@ -54,8 +60,12 @@ public class ChannelServiceAdapter implements ChannelServicePort {
     }
 
     @Override
-    public boolean changeChannel(String name) {
-        return false;
+    public void changeChannel(String name, String token) {
+        User user = verifyPermission(token);
+        Channel channel = getChannelIfExists(name);
+
+        enableChanelOnServer(channel);
+        moveUserToNewChannel(user, channel);
     }
 
     @Override
@@ -88,9 +98,40 @@ public class ChannelServiceAdapter implements ChannelServicePort {
         return null;
     }
 
-    private void verifyPermission(String token) {
-        if (userRepository.findByToken(token).isEmpty()) {
-            throw new ChannelException(USER_INVALID_TOKEN);
+    private User verifyPermission(String token) {
+        Optional<User> user = userRepository.findByToken(token);
+
+        if (user.isEmpty()) {
+            throw new UserException(USER_INVALID_TOKEN);
         }
+
+        return user.get();
+    }
+
+    private Channel getChannelIfExists(String name) {
+        Optional<Channel> channel = channelRepository.findByName(name);
+
+        if (channel.isEmpty()) {
+            throw new ChannelException(CHANNEL_NOT_FOUND);
+        }
+
+        return channel.get();
+    }
+
+    private void enableChanelOnServer(Channel channel) {
+        if (chatService.getAllServerChannels().stream().noneMatch(ch -> ch.getName().equals(channel.getName()))) {
+            chatService.addChannel(channel);
+        }
+    }
+
+    private void moveUserToNewChannel(User user, Channel channel) {
+        chatService.getAllServerChannels().forEach(ch -> ch.getActiveUsers().remove(user.getNick()));
+
+        Set<String> activeUsers = chatService.getAllServerChannels().stream()
+                .filter(ch -> ch.getName().equals(channel.getName()))
+                .map(Channel::getActiveUsers)
+                .findFirst().orElseThrow();
+
+        activeUsers.add(user.getNick());
     }
 }

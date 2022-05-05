@@ -14,8 +14,14 @@ public class ChatService implements ChatServicePort {
 
     private final Set<Channel> channels = new HashSet<>();
 
+    @Override
     public void addChannel(Channel channel) {
         channels.add(channel);
+    }
+
+    @Override
+    public Set<Channel> getAllServerChannels() {
+        return channels;
     }
 
     @Override

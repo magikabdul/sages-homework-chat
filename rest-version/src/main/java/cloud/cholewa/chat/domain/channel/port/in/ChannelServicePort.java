@@ -10,7 +10,7 @@ public interface ChannelServicePort {
 
     Channel createChannel(Channel channel, String token);
 
-    boolean changeChannel(String name);
+    void changeChannel(String name, String token);
 
     Message publishMessage(String message, String token);
 
