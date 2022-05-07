@@ -12,9 +12,13 @@ import cloud.cholewa.chat.domain.user.exceptions.UserException;
 import cloud.cholewa.chat.domain.user.model.User;
 import cloud.cholewa.chat.domain.user.port.out.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -96,6 +100,24 @@ public class ChannelServiceAdapter implements ChannelServicePort {
                 .orElseThrow();
 
         return messageRepository.getChannelHistory(channel.getName());
+    }
+
+    @SneakyThrows
+    @Override
+    public void saveFile(MultipartFormDataInput input) {
+        InputStream inputStream = input.getFormDataPart("file", InputStream.class, null);
+        String fileName = input.getFormDataPart("fileName", String.class,null);
+
+        int read;
+        byte[] bytes = new byte[1024];
+
+        var outputStream = new FileOutputStream("d://" + fileName);
+        while ((read = inputStream.read(bytes)) != -1) {
+            outputStream.write(bytes, 0, read);
+        }
+
+        outputStream.flush();
+        outputStream.close();
     }
 
     @Override

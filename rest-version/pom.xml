@@ -30,6 +30,12 @@
             <artifactId>flyway-core</artifactId>
             <version>8.5.9</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-multipart-provider</artifactId>
+            <version>6.0.1.Final</version>
+        </dependency>
     </dependencies>
 
     <build>

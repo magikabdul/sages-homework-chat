@@ -5,9 +5,12 @@ import cloud.cholewa.chat.domain.channel.port.in.ChannelServicePort;
 import cloud.cholewa.chat.infrastructure.application.rest.channel.dto.ChannelCreateRequest;
 import cloud.cholewa.chat.infrastructure.application.rest.channel.dto.ChannelRestMapper;
 import cloud.cholewa.chat.infrastructure.application.rest.channel.dto.MessagePublishRequest;
+import lombok.SneakyThrows;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -74,6 +77,21 @@ public class ChannelController {
                                    @HeaderParam("token") String token) {
 
         return Response.ok(channelServicePort.publishMessage(messagePublishRequest.getBody(), token)).build();
+    }
+
+    @SneakyThrows
+    @POST
+    @Path("/files/upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response uploadFile(MultipartFormDataInput input) {
+        channelServicePort.saveFile(input);
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("/files/download")
+    public Response downloadFile() {
+        return Response.ok().build();
     }
 
 
