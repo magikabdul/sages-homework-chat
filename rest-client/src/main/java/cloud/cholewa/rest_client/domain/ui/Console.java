@@ -1,5 +1,9 @@
 package cloud.cholewa.rest_client.domain.ui;
 
+import cloud.cholewa.rest_client.domain.dto.MessageHistoryDto;
+
+import java.util.List;
+
 @SuppressWarnings("StringBufferReplaceableByString")
 public class Console {
 
@@ -91,6 +95,35 @@ public class Console {
                 .append(PROMPT)
                 .append(ConsoleColor.RESET)
                 .append("\s");
+        System.out.print(sb);
+    }
+
+    public static void showHistoryStart() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColor.GREEN_BACKGROUND)
+                .append("------------------------- BEGIN -------------------------")
+                .append(ConsoleColor.RESET)
+                .append("\n");
+        System.out.print(sb);
+    }
+
+    public static void showHistoryPosition(List<MessageHistoryDto> list) {
+        list.forEach(h -> {
+            StringBuilder sb = new StringBuilder();
+            sb.append(h.getCreatedAtDate()).append(" ").append(h.getCreatedAtTime()).append(" ")
+                    .append("[ ").append(h.getNick()).append(" ]")
+                    .append(" - ").append(h.getBody())
+                    .append("\n");
+            System.out.print(sb);
+        });
+    }
+
+    public static void showHistoryEnd() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ConsoleColor.RED_BACKGROUND)
+                .append("-------------------------- END --------------------------")
+                .append(ConsoleColor.RESET)
+                .append("\n");
         System.out.print(sb);
     }
 }
