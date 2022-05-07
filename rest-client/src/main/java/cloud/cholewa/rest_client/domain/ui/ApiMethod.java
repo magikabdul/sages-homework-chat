@@ -11,8 +11,12 @@ public class ApiMethod {
     private final ResteasyClient restClient = new ResteasyClientBuilderImpl().build();
     private final String SERVER_URL = "http://localhost:8080/chat/";
 
-    public Response doGet(String requestPath) {
-        return null;
+    public Response doGet(String requestPath, String token) {
+        return restClient.target(SERVER_URL + requestPath)
+                .request()
+                .accept(MediaType.APPLICATION_JSON)
+                .header("token", token)
+                .get();
     }
 
     public Response doPost(String requestPath, Object requestBody) {

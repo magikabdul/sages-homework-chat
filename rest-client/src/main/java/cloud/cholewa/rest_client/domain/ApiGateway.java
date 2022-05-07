@@ -15,5 +15,7 @@ public class ApiGateway {
         return method.doPost("users/login", requestBody);
     }
 
-
+    public Response getHistory(String token) {
+        return method.doGet("channels/history", token);
+    }
 }
