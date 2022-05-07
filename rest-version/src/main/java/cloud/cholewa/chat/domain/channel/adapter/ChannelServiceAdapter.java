@@ -17,6 +17,7 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -118,6 +119,13 @@ public class ChannelServiceAdapter implements ChannelServicePort {
 
         outputStream.flush();
         outputStream.close();
+    }
+
+    @Override
+    public File getFile(String fileName) {
+        File file = new File("d:\\" + fileName);
+
+        return file;
     }
 
     @Override

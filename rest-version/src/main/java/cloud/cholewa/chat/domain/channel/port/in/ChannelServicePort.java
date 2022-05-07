@@ -6,6 +6,7 @@ import cloud.cholewa.chat.domain.channel.model.Message;
 import cloud.cholewa.chat.domain.user.model.User;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
+import java.io.File;
 import java.util.List;
 
 public interface ChannelServicePort {
@@ -23,6 +24,8 @@ public interface ChannelServicePort {
     List<HistoryMessage> getHistory(String token);
 
     void saveFile(MultipartFormDataInput input);
+
+    File getFile(String fileName);
 
     User getMemberByNick();
 
