@@ -4,12 +4,13 @@ import cloud.cholewa.rest_client.domain.ui.Console;
 
 public class ChatClient {
 
-    private final ClientService service = new ClientService();
+    private final ClientServicePort servicePort = new ClientService();
 
     public void start() {
         Console.clear();
         Console.showWelcomeMessage();
-        service.processLogin();
-        service.processLogout();
+        servicePort.processLogin();
+        servicePort.processChat();
+        servicePort.processLogout();
     }
 }

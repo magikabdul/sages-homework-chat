@@ -10,10 +10,12 @@ import org.apache.http.HttpStatus;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ClientService {
+public class ClientService implements ClientServicePort {
 
     private final ExecutorService es = Executors.newSingleThreadExecutor();
     private final ApiGateway apiGateway = new ApiGateway();
+
+    public static final String END_SESSION = "\\q";
 
     private String userName;
     private String token;
@@ -24,6 +26,7 @@ public class ClientService {
         return es.submit(new ConsoleReader()).get();
     }
 
+    @Override
     public void processLogin() {
         boolean done = false;
 
@@ -38,6 +41,20 @@ public class ClientService {
                 }
                 case "3" -> done = true;
                 default -> Console.errorMessage("Invalid option", true);
+            }
+        }
+    }
+
+    @Override
+    public void processChat() {
+        boolean done = false;
+
+        while (!done) {
+            String command = getConsole();
+
+            switch (command) {
+                case END_SESSION -> done = true;
+                default -> Console.advancedPrompt(channel, userName);
             }
         }
     }
@@ -94,6 +111,7 @@ public class ClientService {
         return true;
     }
 
+    @Override
     public void processLogout() {
         Console.infoMessage("\n Bye !!! ", false);
         es.shutdown();
