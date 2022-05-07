@@ -8,6 +8,9 @@ public class ChatClient {
 
     public void start() {
         Console.clear();
+
+        new Thread(() -> new JmsListener().listen()).start();
+
         Console.showWelcomeMessage();
         service.processLogin();
         service.processLogout();
