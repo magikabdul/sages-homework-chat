@@ -80,6 +80,22 @@ public class ChannelController {
         return Response.ok(channelServicePort.publishMessage(messagePublishRequest.getBody(), token)).build();
     }
 
+    @GET
+    @Path("/messages/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMessageById(@PathParam("id") Long id,
+                                   @HeaderParam("token") String token) {
+
+        return Response.ok(channelServicePort.findMessageById(id, token)).build();
+    }
+
+    @GET
+    @Path("/messages/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getLastPostedMessage(@HeaderParam("token") String token) {
+        return Response.ok(channelServicePort.findLastPostedMessage(token)).build();
+    }
+
     @POST
     @Path("/files/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
