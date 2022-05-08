@@ -177,6 +177,17 @@ Po pomyślnym zalogowaniu wyświetla się prompt z nazwą kanału i loginem uży
 
 ![img.png](screens/client-history.png)
 
+### PUBLIKOWANIE WIADOMOŚCI
+
+Konsola użytkownika `qwe`
+
+![img.png](screens/client-qwe.png)
+
+Konsola użytkownika `asd`
+
+![img.png](screens/client-asd.png)
+
+
 ### ZAKOŃCZENIE PRACY
 
 ![img.png](screens/client-end-work.png)
