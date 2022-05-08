@@ -126,4 +126,18 @@ public class Console {
                 .append("\n");
         System.out.print(sb);
     }
+
+    public static void chatMessage(MessageHistoryDto messageHistoryDto) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n")
+                .append(ConsoleColor.MAGENTA_BACKGROUND)
+                .append("[ ")
+                .append(messageHistoryDto.getNick())
+                .append(" ]")
+                .append(" - ")
+                .append(messageHistoryDto.getBody())
+                .append(ConsoleColor.RESET)
+                .append("\n");
+        System.out.print(sb);
+    }
 }

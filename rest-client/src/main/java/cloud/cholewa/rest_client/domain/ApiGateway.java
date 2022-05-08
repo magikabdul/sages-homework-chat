@@ -18,4 +18,8 @@ public class ApiGateway {
     public Response getHistory(String token) {
         return method.doGet("channels/history", token);
     }
+
+    public Response getLastChannelMessage(String token) {
+        return method.doGet("channels/messages", token);
+    }
 }
