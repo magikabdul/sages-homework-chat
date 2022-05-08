@@ -2,6 +2,7 @@ package cloud.cholewa.rest_client.domain;
 
 import cloud.cholewa.rest_client.domain.dto.ErrorDto;
 import cloud.cholewa.rest_client.domain.dto.MessageHistoryDto;
+import cloud.cholewa.rest_client.domain.dto.MessagePublishDto;
 import cloud.cholewa.rest_client.domain.dto.TokenDto;
 import cloud.cholewa.rest_client.domain.dto.UserDto;
 import cloud.cholewa.rest_client.domain.ui.Console;
@@ -12,6 +13,7 @@ import org.apache.http.HttpStatus;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class ClientService implements ClientServicePort {
 
@@ -24,6 +26,7 @@ public class ClientService implements ClientServicePort {
     private String userName;
     private String token;
     private String channel;
+    private long myLastMessageId;
 
     @SneakyThrows
     public String getConsole() {
@@ -51,6 +54,10 @@ public class ClientService implements ClientServicePort {
 
     @Override
     public void processChat() {
+        Thread thread = new Thread(this::startMessagePulling);
+        thread.setDaemon(true);
+        thread.start();
+
         boolean done = false;
 
         while (!done) {
@@ -59,8 +66,39 @@ public class ClientService implements ClientServicePort {
             switch (command) {
                 case END_SESSION -> done = true;
                 case GET_HISTORY -> showHistory();
-                default -> Console.advancedPrompt(channel, userName);
+                default -> publishMessage(command);
             }
+        }
+    }
+
+    private void publishMessage(String message) {
+        var response = apiGateway.sendMessage(
+                MessagePublishDto.builder()
+                        .body(message)
+                        .build(),
+                token
+        );
+
+        myLastMessageId = response.readEntity(MessageHistoryDto.class).getId();
+
+        Console.advancedPrompt(channel, userName);
+    }
+
+    @SneakyThrows
+    private void startMessagePulling() {
+        long lastMessageId = 0;
+
+        while (true) {
+            var response = apiGateway.getLastChannelMessage(token)
+                    .readEntity(MessageHistoryDto.class);
+
+            if (lastMessageId != response.getId() && myLastMessageId != response.getId()) {
+                lastMessageId = response.getId();
+                Console.chatMessage(response);
+                Console.advancedPrompt(channel, userName);
+            }
+
+            TimeUnit.SECONDS.sleep(1);
         }
     }
 
@@ -71,7 +109,8 @@ public class ClientService implements ClientServicePort {
         if (response.getStatus() == HttpStatus.SC_FORBIDDEN) {
             Console.errorMessage(response.readEntity(ErrorDto.class).getDescription(), false);
         } else {
-            List<MessageHistoryDto> list = response.readEntity(new GenericType<>() {});
+            List<MessageHistoryDto> list = response.readEntity(new GenericType<>() {
+            });
             Console.showHistoryStart();
             Console.showHistoryPosition(list);
             Console.showHistoryEnd();
