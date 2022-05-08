@@ -1,5 +1,6 @@
 package cloud.cholewa.rest_client.domain;
 
+import cloud.cholewa.rest_client.domain.dto.MessagePublishDto;
 import cloud.cholewa.rest_client.domain.ui.ApiMethod;
 import jakarta.ws.rs.core.Response;
 
@@ -16,10 +17,14 @@ public class ApiGateway {
     }
 
     public Response getHistory(String token) {
-        return method.doGet("channels/history", token);
+        return method.doGetAuthorized("channels/history", token);
     }
 
     public Response getLastChannelMessage(String token) {
-        return method.doGet("channels/messages", token);
+        return method.doGetAuthorized("channels/messages", token);
+    }
+
+    public Response sendMessage(MessagePublishDto messagePublishDto, String token) {
+        return method.doPostAuthorized("channels/messages", messagePublishDto, token);
     }
 }

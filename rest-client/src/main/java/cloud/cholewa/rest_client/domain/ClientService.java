@@ -2,6 +2,7 @@ package cloud.cholewa.rest_client.domain;
 
 import cloud.cholewa.rest_client.domain.dto.ErrorDto;
 import cloud.cholewa.rest_client.domain.dto.MessageHistoryDto;
+import cloud.cholewa.rest_client.domain.dto.MessagePublishDto;
 import cloud.cholewa.rest_client.domain.dto.TokenDto;
 import cloud.cholewa.rest_client.domain.dto.UserDto;
 import cloud.cholewa.rest_client.domain.ui.Console;
@@ -25,6 +26,7 @@ public class ClientService implements ClientServicePort {
     private String userName;
     private String token;
     private String channel;
+    private long myLastMessageId;
 
     @SneakyThrows
     public String getConsole() {
@@ -64,9 +66,22 @@ public class ClientService implements ClientServicePort {
             switch (command) {
                 case END_SESSION -> done = true;
                 case GET_HISTORY -> showHistory();
-                default -> Console.advancedPrompt(channel, userName);
+                default -> publishMessage(command);
             }
         }
+    }
+
+    private void publishMessage(String message) {
+        var response = apiGateway.sendMessage(
+                MessagePublishDto.builder()
+                        .body(message)
+                        .build(),
+                token
+        );
+
+        myLastMessageId = response.readEntity(MessageHistoryDto.class).getId();
+
+        Console.advancedPrompt(channel, userName);
     }
 
     @SneakyThrows
@@ -77,7 +92,7 @@ public class ClientService implements ClientServicePort {
             var response = apiGateway.getLastChannelMessage(token)
                     .readEntity(MessageHistoryDto.class);
 
-            if (lastMessageId != response.getId()) {
+            if (lastMessageId != response.getId() && myLastMessageId != response.getId()) {
                 lastMessageId = response.getId();
                 Console.chatMessage(response);
                 Console.advancedPrompt(channel, userName);
