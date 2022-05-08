@@ -34,11 +34,28 @@ public class MessageJpaRepository {
         return findById(singleResult.longValue()).orElseThrow();
     }
 
+    public Optional<HistoryMessageEntity> getHistoryMessageById(Long id) {
+        try {
+            return Optional.of((HistoryMessageEntity) entityManager.createNativeQuery(
+                            "SELECT messages.id, name, nick, body, created_at_date, created_at_time FROM messages " +
+                                    "LEFT JOIN channels ON channel_id = channels.id " +
+                                    "LEFT JOIN users ON user_id = users.id " +
+                                    "WHERE messages.id=:id", HistoryMessageEntity.class)
+                    .setParameter("id", id)
+                    .getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
     public List<HistoryMessageEntity> getHistoryByChannel(String channelName) {
-        List<HistoryMessageEntity> resultList = entityManager.createNativeQuery("SELECT messages.id, name, nick, body, created_at_date, created_at_time FROM messages " +
-                "LEFT JOIN channels ON channel_id = channels.id " +
-                "LEFT JOIN users ON user_id = users.id " +
-                "WHERE name=:name ORDER BY created_at_date DESC, created_at_time DESC", HistoryMessageEntity.class).setParameter("name", channelName).getResultList();
+        List<HistoryMessageEntity> resultList = entityManager.createNativeQuery(
+                "SELECT messages.id, name, nick, body, created_at_date, created_at_time FROM messages " +
+                        "LEFT JOIN channels ON channel_id = channels.id " +
+                        "LEFT JOIN users ON user_id = users.id " +
+                        "WHERE name=:name ORDER BY created_at_date DESC, created_at_time DESC", HistoryMessageEntity.class)
+                .setParameter("name", channelName)
+                .getResultList();
 
         return resultList;
     }

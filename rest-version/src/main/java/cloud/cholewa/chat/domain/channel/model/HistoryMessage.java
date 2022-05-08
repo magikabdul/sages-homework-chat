@@ -8,6 +8,7 @@ import java.time.LocalTime;
 @Data
 public class HistoryMessage {
 
+    private Long id;
     private String name;
     private String nick;
     private String body;

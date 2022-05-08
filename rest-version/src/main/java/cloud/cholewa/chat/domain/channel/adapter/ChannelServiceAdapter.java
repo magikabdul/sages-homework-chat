@@ -1,6 +1,7 @@
 package cloud.cholewa.chat.domain.channel.adapter;
 
 import cloud.cholewa.chat.domain.channel.exceptions.ChannelException;
+import cloud.cholewa.chat.domain.channel.exceptions.MessageException;
 import cloud.cholewa.chat.domain.channel.model.Channel;
 import cloud.cholewa.chat.domain.channel.model.HistoryMessage;
 import cloud.cholewa.chat.domain.channel.model.Message;
@@ -28,7 +29,9 @@ import java.util.Set;
 
 import static cloud.cholewa.chat.domain.channel.exceptions.ChannelExceptionDictionary.CHANNEL_EXIST;
 import static cloud.cholewa.chat.domain.channel.exceptions.ChannelExceptionDictionary.CHANNEL_NOT_FOUND;
+import static cloud.cholewa.chat.domain.channel.exceptions.MessageExceptionDictionary.MESSAGE_NOT_FOUND;
 import static cloud.cholewa.chat.domain.user.exceptions.UserExceptionDictionary.USER_INVALID_TOKEN;
+import static cloud.cholewa.chat.domain.user.exceptions.UserExceptionDictionary.USER_IS_NOT_CHANNEL_MEMBER;
 
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -59,7 +62,7 @@ public class ChannelServiceAdapter implements ChannelServicePort {
         var channel = chatService.getAllServerChannels().stream()
                 .filter(ch -> ch.getActiveUsers().contains(user.getNick()))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new UserException(USER_IS_NOT_CHANNEL_MEMBER));
 
         var newMessage = Message.builder()
                 .createdAtDate(LocalDate.now())
@@ -69,7 +72,33 @@ public class ChannelServiceAdapter implements ChannelServicePort {
                 .channel(channel)
                 .build();
 
-        return messageRepository.save(newMessage);
+        Message savedMessage = messageRepository.save(newMessage);
+        channel.setLastPostedMessageId(savedMessage.getId());
+
+        return savedMessage;
+    }
+
+    @Override
+    public HistoryMessage findMessageById(Long id, String token) {
+        verifyPermission(token);
+
+        return messageRepository.findById(id)
+                .orElseThrow(() -> new MessageException(MESSAGE_NOT_FOUND));
+    }
+
+    @Override
+    public HistoryMessage findLastPostedMessage(String token) {
+        verifyPermission(token);
+
+        var user = userRepository.findByToken(token).orElseThrow();
+
+        var channel = chatService.getAllServerChannels().stream()
+                .filter(ch -> ch.getActiveUsers().contains(user.getNick()))
+                .findFirst()
+                .orElseThrow(() -> new UserException(USER_IS_NOT_CHANNEL_MEMBER));
+
+        return messageRepository.findById(channel.getLastPostedMessageId())
+                .orElseThrow(() -> new MessageException(MESSAGE_NOT_FOUND));
     }
 
     @Override

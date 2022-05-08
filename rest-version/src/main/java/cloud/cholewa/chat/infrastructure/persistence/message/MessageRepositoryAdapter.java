@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -26,5 +27,17 @@ public class MessageRepositoryAdapter implements MessageRepositoryPort {
         return messageRepository.getHistoryByChannel(channelName).stream()
                 .map(messageMapper::toDomain)
                 .collect(toList());
+    }
+
+    @Override
+    public Optional<HistoryMessage> findById(Long id) {
+        Optional<HistoryMessageEntity> optionalMessageEntity = messageRepository.getHistoryMessageById(id);
+
+        if (optionalMessageEntity.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(messageMapper.toDomain(optionalMessageEntity.get()));
+
+        }
     }
 }

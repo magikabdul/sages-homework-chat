@@ -11,6 +11,7 @@ import java.time.LocalTime;
 @Builder
 public class Message {
 
+    private Long id;
     private LocalDate createdAtDate;
     private LocalTime createdAtTime;
     private String body;

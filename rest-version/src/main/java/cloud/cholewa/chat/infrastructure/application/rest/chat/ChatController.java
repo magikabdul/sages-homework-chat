@@ -18,6 +18,7 @@ public class ChatController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFullInfo() {
+        chatServicePort.getFullInfo().forEach(System.out::println);
         return Response.ok(chatServicePort.getFullInfo()).build();
     }
 }

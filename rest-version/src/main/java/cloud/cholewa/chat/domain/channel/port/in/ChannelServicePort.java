@@ -23,6 +23,10 @@ public interface ChannelServicePort {
 
     List<HistoryMessage> getHistory(String token);
 
+    HistoryMessage findMessageById(Long id, String token);
+
+    HistoryMessage findLastPostedMessage(String token);
+
     void saveFile(MultipartFormDataInput input);
 
     File getFile(String fileName);

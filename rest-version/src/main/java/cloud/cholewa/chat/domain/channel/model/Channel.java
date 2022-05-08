@@ -11,6 +11,7 @@ public class Channel {
     private Long id;
     private String name;
     private Set<String> activeUsers = new HashSet<>();
+    private Long lastPostedMessageId;
 
     public void addActiveUser(String name) {
         activeUsers.add(name);
