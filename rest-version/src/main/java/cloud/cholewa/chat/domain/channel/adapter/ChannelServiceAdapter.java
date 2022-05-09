@@ -97,8 +97,14 @@ public class ChannelServiceAdapter implements ChannelServicePort {
                 .findFirst()
                 .orElseThrow(() -> new UserException(USER_IS_NOT_CHANNEL_MEMBER));
 
-        return messageRepository.findById(channel.getLastPostedMessageId())
-                .orElseThrow(() -> new MessageException(MESSAGE_NOT_FOUND));
+        Long lastPostedMessageId = channel.getLastPostedMessageId();
+
+        if (lastPostedMessageId > 0) {
+            return messageRepository.findById(lastPostedMessageId)
+                    .orElseThrow(() -> new MessageException(MESSAGE_NOT_FOUND));
+        } else {
+            throw new MessageException(MESSAGE_NOT_FOUND);
+        }
     }
 
     @Override
@@ -136,7 +142,7 @@ public class ChannelServiceAdapter implements ChannelServicePort {
     @Override
     public void saveFile(MultipartFormDataInput input) {
         InputStream inputStream = input.getFormDataPart("file", InputStream.class, null);
-        String fileName = input.getFormDataPart("fileName", String.class,null);
+        String fileName = input.getFormDataPart("fileName", String.class, null);
 
         int read;
         byte[] bytes = new byte[1024];
