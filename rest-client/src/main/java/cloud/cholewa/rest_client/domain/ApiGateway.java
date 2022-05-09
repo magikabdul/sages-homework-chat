@@ -1,5 +1,6 @@
 package cloud.cholewa.rest_client.domain;
 
+import cloud.cholewa.rest_client.domain.dto.CreateChannelDto;
 import cloud.cholewa.rest_client.domain.dto.MessagePublishDto;
 import cloud.cholewa.rest_client.domain.ui.ApiMethod;
 import jakarta.ws.rs.core.Response;
@@ -26,5 +27,13 @@ public class ApiGateway {
 
     public Response sendMessage(MessagePublishDto messagePublishDto, String token) {
         return method.doPostAuthorized("channels/messages", messagePublishDto, token);
+    }
+
+    public Response doChannelChange(String channelName, String token) {
+        return method.doGetAuthorized("channels/change/" + channelName, token);
+    }
+
+    public Response addChannel(CreateChannelDto createChannelDto, String token) {
+        return method.doPostAuthorized("channels", createChannelDto, token);
     }
 }

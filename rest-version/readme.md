@@ -187,6 +187,13 @@ Konsola użytkownika `asd`
 
 ![img.png](screens/client-asd.png)
 
+### UTWORZENIE NOWEGO KANAŁU
+
+![img.png](screens/client-channel-create.png)
+
+### ZMIANA KANAŁU
+
+![img.png](screens/client-channel-change.png)
 
 ### ZAKOŃCZENIE PRACY
 

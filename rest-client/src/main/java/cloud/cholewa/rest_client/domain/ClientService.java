@@ -1,5 +1,6 @@
 package cloud.cholewa.rest_client.domain;
 
+import cloud.cholewa.rest_client.domain.dto.CreateChannelDto;
 import cloud.cholewa.rest_client.domain.dto.ErrorDto;
 import cloud.cholewa.rest_client.domain.dto.MessageHistoryDto;
 import cloud.cholewa.rest_client.domain.dto.MessagePublishDto;
@@ -22,6 +23,7 @@ public class ClientService implements ClientServicePort {
 
     public static final String END_SESSION = "\\q";
     public static final String GET_HISTORY = "\\h";
+    public static final String CHANNEL = "\\c";
 
     private String userName;
     private String token;
@@ -46,7 +48,7 @@ public class ClientService implements ClientServicePort {
                     executeRegister();
                     done = executeLogin();
                 }
-                case "3" -> done = true;
+                case "3" -> System.exit(0);
                 default -> Console.errorMessage("Invalid option", true);
             }
         }
@@ -66,9 +68,66 @@ public class ClientService implements ClientServicePort {
             switch (command) {
                 case END_SESSION -> done = true;
                 case GET_HISTORY -> showHistory();
+                case CHANNEL -> handleChannel();
                 default -> publishMessage(command);
             }
         }
+    }
+
+    private void handleChannel() {
+        boolean done = false;
+        showChannelMenu();
+
+        while (!done) {
+            String command = getConsole();
+
+            switch (command) {
+                case "1" -> done = executeChannelChange();
+                case "2" -> done = executeChannelCreate();
+                case "3" -> {
+                    done = true;
+                    Console.advancedPrompt(channel, userName);
+                }
+                default -> Console.errorMessage("Invalid option", true);
+            }
+        }
+    }
+
+    private boolean executeChannelCreate() {
+        Console.infoMessage("Enter channel name: ", false);
+        String channelName = getConsole();
+
+        var response = apiGateway.addChannel(new CreateChannelDto(channelName), token);
+
+        if (response.getStatus() == HttpStatus.SC_CREATED) {
+            Console.successMessage("CHANNEL SUCCESSFULLY CREATED", false);
+            showChannelMenu();
+        } else {
+            Console.errorMessage(response.readEntity(ErrorDto.class).getDescription(), false);
+            showChannelMenu();
+        }
+        return false;
+    }
+
+    public boolean executeChannelChange() {
+        Console.infoMessage("Enter channel name: ", false);
+        String channelName = getConsole();
+
+        var response = apiGateway.doChannelChange(channelName, token);
+
+        if (response.getStatus() == HttpStatus.SC_ACCEPTED) {
+            channel = channelName;
+            Console.advancedPrompt(channel, userName);
+            return true;
+        } else {
+            Console.errorMessage(response.readEntity(ErrorDto.class).getDescription(), false);
+        }
+        showChannelMenu();
+        return false;
+    }
+
+    private void showChannelMenu() {
+        Console.showMenu("Select below option", List.of("Change channel", "Create new channel", "Exit"));
     }
 
     private void publishMessage(String message) {
@@ -89,13 +148,18 @@ public class ClientService implements ClientServicePort {
         long lastMessageId = 0;
 
         while (true) {
-            var response = apiGateway.getLastChannelMessage(token)
-                    .readEntity(MessageHistoryDto.class);
+            var response = apiGateway.getLastChannelMessage(token);
 
-            if (lastMessageId != response.getId() && myLastMessageId != response.getId()) {
-                lastMessageId = response.getId();
-                Console.chatMessage(response);
-                Console.advancedPrompt(channel, userName);
+            if (response.getStatus() != HttpStatus.SC_NOT_FOUND) {
+                MessageHistoryDto messageHistoryDto = response.readEntity(MessageHistoryDto.class);
+
+                if (lastMessageId != messageHistoryDto.getId()
+                        && myLastMessageId != messageHistoryDto.getId()
+                        && !userName.equals(messageHistoryDto.getNick())) {
+                    lastMessageId = messageHistoryDto.getId();
+                    Console.chatMessage(messageHistoryDto);
+                    Console.advancedPrompt(channel, userName);
+                }
             }
 
             TimeUnit.SECONDS.sleep(1);
