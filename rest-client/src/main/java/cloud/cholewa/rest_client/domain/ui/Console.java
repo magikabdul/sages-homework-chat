@@ -24,17 +24,9 @@ public class Console {
                         '  '--'\\ |  | |  | \\ '-'  |   |  |
                          `-----' `--' `--'  `--`--'   `--'
 
-                        """)
-                .append(ConsoleColor.WHITE_BOLD)
-                .append(buildMenu("Select below option", List.of("Login", "Register", "Exit")));
-//                .append("""
-//                        Select below option
-//                        1. Login
-//                        2. Register
-//                        3. Exit
-//                        """);
-        System.out.print(sb);
-        showPrompt();
+                        """);
+        System.out.println(sb);
+        showMenu("Select below option", List.of("Login", "Register", "Exit"));
     }
 
     public static void infoMessage(String message, boolean showPrompt) {
@@ -143,7 +135,7 @@ public class Console {
         System.out.print(sb);
     }
 
-    public static String buildMenu(String menuTitle, List<String> menuPositions) {
+    public static void showMenu(String menuTitle, List<String> menuPositions) {
         StringBuilder sb = new StringBuilder();
         sb.append(ConsoleColor.WHITE_BOLD)
                 .append(menuTitle)
@@ -155,7 +147,8 @@ public class Console {
             sb.append(iterator.nextIndex() + 1).append(". ").append(iterator.next()).append("\n");
         }
 
-        sb.append(ConsoleColor.RESET).append("\n");
-        return sb.toString();
+        sb.append(ConsoleColor.RESET);
+        System.out.println(sb);
+        showPrompt();
     }
 }

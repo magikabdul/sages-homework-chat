@@ -1,5 +1,6 @@
 package cloud.cholewa.rest_client.domain;
 
+import cloud.cholewa.rest_client.domain.dto.CreateChannelDto;
 import cloud.cholewa.rest_client.domain.dto.ErrorDto;
 import cloud.cholewa.rest_client.domain.dto.MessageHistoryDto;
 import cloud.cholewa.rest_client.domain.dto.MessagePublishDto;
@@ -74,9 +75,60 @@ public class ClientService implements ClientServicePort {
     }
 
     private void handleChannel() {
+        boolean done = false;
+        showChannelMenu();
 
+        while (!done) {
+            String command = getConsole();
+
+            switch (command) {
+                case "1" -> done = executeChannelChange();
+                case "2" -> done = executeChannelCreate();
+                case "3" -> {
+                    done = true;
+                    Console.advancedPrompt(channel, userName);
+                }
+                default -> Console.errorMessage("Invalid option", true);
+            }
+        }
     }
 
+    private boolean executeChannelCreate() {
+        Console.infoMessage("Enter channel name: ", false);
+        String channelName = getConsole();
+
+        var response = apiGateway.addChannel(new CreateChannelDto(channelName), token);
+
+        if (response.getStatus() == HttpStatus.SC_CREATED) {
+            Console.successMessage("CHANNEL SUCCESSFULLY CREATED", false);
+            showChannelMenu();
+        } else {
+            Console.errorMessage(response.readEntity(ErrorDto.class).getDescription(), false);
+            showChannelMenu();
+        }
+        return false;
+    }
+
+    public boolean executeChannelChange() {
+        Console.infoMessage("Enter channel name: ", false);
+        String channelName = getConsole();
+
+        var response = apiGateway.doChannelChange(channelName, token);
+
+        if (response.getStatus() == HttpStatus.SC_ACCEPTED) {
+            channel = channelName;
+            Console.advancedPrompt(channel, userName);
+            return true;
+        } else {
+            Console.errorMessage(response.readEntity(ErrorDto.class).getDescription(), false);
+        }
+        showChannelMenu();
+        return false;
+    }
+
+    private void showChannelMenu() {
+        Console.showMenu("Select below option", List.of("Change channel", "Create new channel", "Exit"));
+    }
 
     private void publishMessage(String message) {
         var response = apiGateway.sendMessage(
@@ -101,7 +153,9 @@ public class ClientService implements ClientServicePort {
             if (response.getStatus() != HttpStatus.SC_NOT_FOUND) {
                 MessageHistoryDto messageHistoryDto = response.readEntity(MessageHistoryDto.class);
 
-                if (lastMessageId != messageHistoryDto.getId() && myLastMessageId != messageHistoryDto.getId()) {
+                if (lastMessageId != messageHistoryDto.getId()
+                        && myLastMessageId != messageHistoryDto.getId()
+                        && !userName.equals(messageHistoryDto.getNick())) {
                     lastMessageId = messageHistoryDto.getId();
                     Console.chatMessage(messageHistoryDto);
                     Console.advancedPrompt(channel, userName);
